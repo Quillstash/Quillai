@@ -17,7 +17,7 @@ export function PageContent() {
 
     const signInResult = await signIn('google', {
       redirect: false,
-      callbackUrl: searchParams?.get('from') || '/dashboard',
+      callbackUrl: searchParams?.get('from') || '/articles',
     });
 
     setIsGoogleLoading(false);
@@ -32,7 +32,7 @@ export function PageContent() {
 
     const signInResult = await signIn('apple', {
       redirect: false,
-      callbackUrl: searchParams?.get('from') || '/dashboard',
+      callbackUrl: searchParams?.get('from') || '/articles',
     });
 
     setIsGithubLoading(false);

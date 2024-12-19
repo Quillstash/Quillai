@@ -3,20 +3,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 enum PLANS {
   FREE
-  PREMIUM
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum GeneratingState {
+  GENERATED
+  GENERATING
+  DRAFT
+  CANCELLED
 }
 
 model Article {
-  id          String   @id @default(cuid())
-  description String
-  authorId    String
-  title       String
-  content     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  author      User     @relation(fields: [authorId], references: [id])
+  id               String          @id @default(cuid())
+  slug      String
+  metaDescription  String?
+  keywords         String[]
+  authorId         String
+  title            String
+  content          String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  author           User            @relation(fields: [authorId], references: [id])
+  generationCost   Float           @default(2)
+  generatingState  GeneratingState @default(DRAFT)
+  coverImage       String?
 }
 
 model User {
@@ -29,6 +47,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   payments      Payment[]
+  credits       Float     @default(0)
+  plan          PLANS     @default(FREE)
 }
 
 model Payment {
