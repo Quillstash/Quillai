@@ -3,8 +3,9 @@ import {
     UsersIcon,        // For team collaboration
     HelpCircleIcon,   // For help and support
     MessageSquareIcon,// For feedback
-    FileTextIcon,
+   
     Pen,     // For article management
+    UserCog2Icon,
   } from "lucide-react";
   
   export const data = {
@@ -16,27 +17,11 @@ import {
     navMain: [
       {
         title: "QuillAi",
-        url: "/quillai", // Main dashboard link
+        url: "/articles", // Main dashboard link
         icon: Pen, // Dashboard icon
         isActive: true,
       },
-      {
-        title: "Article Management",
-        url: "/ai-articles", // Default view-all link for articles
-        icon: FileTextIcon, // Article management icon
-        // items: [
-        //   {
-        //     title: "Create Article",
-        //     url: "/articles/create", // Link to create an SEO-optimized article
-        //     icon: Edit3Icon, // Icon for creating articles
-        //   },
-        //   {
-        //     title: "View All Articles",
-        //     url: "/articles/view-all", // Link to view all user-created articles
-        //     icon: FileTextIcon, // Icon for viewing articles
-        //   },
-        // ],
-      },
+    
       {
         title: "Keyword Research",
         url: "/keywords", // Main keyword research link
@@ -51,6 +36,23 @@ import {
         //     title: "Manage Keywords",
         //     url: "/keywords/manage", // Link to manage saved keywords
         //     icon: FileTextIcon, // Icon for managing keywords
+        //   },
+        // ],
+      },
+      {
+        title: "Profile",
+        url: "/setting/profile", // Default view-all link for articles
+        icon: UserCog2Icon, // Article management icon
+        // items: [
+        //   {
+        //     title: "Create Article",
+        //     url: "/articles/create", // Link to create an SEO-optimized article
+        //     icon: Edit3Icon, // Icon for creating articles
+        //   },
+        //   {
+        //     title: "View All Articles",
+        //     url: "/articles/view-all", // Link to view all user-created articles
+        //     icon: FileTextIcon, // Icon for viewing articles
         //   },
         // ],
       },
@@ -76,7 +78,7 @@ import {
     navSecondary: [
       {
         title: "Help & Support",
-        url: "/support", // Support section link
+        url: "", // Support section link
         icon: HelpCircleIcon, // Support icon
       },
       {

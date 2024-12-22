@@ -13,43 +13,61 @@ interface PageProps {
 export async function generateStaticParams() {
   const articles = await db.article.findMany({
     select: { slug: true },
-  })
+  });
   return articles.map((article) => ({
     slug: article.slug,
-  }))
+  }));
 }
 
-export default async function ArticlePage({ params }: PageProps) {
+export default async function ArticlePage({
+  params,
+}: PageProps) {
+  // Validate params first
+  const { slug } = params;
+  if (!slug) notFound();
+
+  // Get session
   const session = await auth();
-  if (!session?.user) redirect('/sign-in');
+  if (!session?.user) redirect('/login');
 
-  if (!params?.slug) notFound();
+  try {
+    const article = await db.article.findFirst({
+      where: {
+        slug,
+        authorId: session.user.id,
+      },
+    });
 
-  const article = await db.article.findFirst({
-    where: {
-      slug: params.slug,
-      authorId: session.user.id
-    },
-  });
+    if (!article) notFound();
 
-  if (!article) notFound();
-
-  return <ArticleComponent article={article} />;
+    return <ArticleComponent article={article} />;
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    notFound();
+  }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  if (!params?.slug) return { title: 'Article Not Found' };
+export async function generateMetadata(
+  { params }: PageProps
+): Promise<Metadata> {
+  const { slug } = params;
+  if (!slug) return { title: 'Article Not Found' };
 
-  const article = await db.article.findFirst({  // Changed from findUnique to findFirst
-    where: { 
-      slug: params.slug 
-    },
-  });
+  try {
+    const article = await db.article.findFirst({
+      where: {
+        slug,
+      },
+    });
 
-  if (!article) return { title: 'Article Not Found' };
+    if (!article) return { title: 'Article Not Found' };
 
-  return {
-    title: article.title,
-    description: article.content,
-  };
+    return {
+      title: article.title,
+      description: article.content,
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return { title: 'Article Not Found' };
+  }
 }

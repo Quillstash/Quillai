@@ -42,10 +42,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="flex flex-col">
         <NavMain items={data.navMain} />
         <div className="mt-auto">
+        <NavSecondary items={data.navSecondary} className="mb-8" />
           <div className="px-4 py-2">
-            <SubscriptionPlanCard currentArticles={3} maxArticles={3} />
+            <SubscriptionPlanCard />
           </div>
-          <NavSecondary items={data.navSecondary} />
         </div>
       </SidebarContent>
 
@@ -55,5 +55,3 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
-
-

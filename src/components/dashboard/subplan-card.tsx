@@ -1,29 +1,56 @@
 "use client"
 
-// import { PricingModal } from '@/components/pricing/pricing-plans'
 import { CreditCard } from 'lucide-react'
+import { PricingModal } from '../pricing/pricing-plans'
+import useSWR from 'swr'
+import { Skeleton } from "@/components/ui/skeleton"
 
-interface SubscriptionPlanCardProps {
-  currentArticles: number
-  maxArticles: number
+const fetcher = async () => {
+  const res = await fetch('/api/getsubscription')
+  if (!res.ok) {
+    throw new Error('Failed to fetch subscription data')
+  }
+  return res.json()
 }
 
-export function SubscriptionPlanCard({
-  currentArticles,
-  maxArticles,
-}: SubscriptionPlanCardProps) {
-  const progress = (currentArticles / maxArticles) * 100
+export function SubscriptionPlanCard() {
+  const { data, error, isLoading } = useSWR('/api/getsubscription', fetcher)
+
+  if (isLoading) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center mb-2">
+          <Skeleton className="h-5 w-5 mr-2" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <div className="mb-2">
+          <Skeleton className="h-4 w-full mb-1" />
+          <Skeleton className="h-2 w-full" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <p className="text-sm text-red-500">Failed to load subscription data</p>
+      </div>
+    )
+  }
+
+  const progress = (data.currentCredits / data.maxCredits) * 100
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center mb-2">
         <CreditCard className="w-5 h-5 mr-2 text-primary" />
-        <h3 className="text-sm font-semibold">Free Plan</h3>
+        <h3 className="text-sm font-semibold">{data.planName} Plan</h3>
       </div>
       <div className="mb-2">
         <div className="flex justify-between text-xs mb-1">
           <span>
-            {currentArticles} / {maxArticles} Articles
+            {data.currentCredits} / {data.maxCredits} Credits
           </span>
           <span>{progress.toFixed(0)}%</span>
         </div>
@@ -34,8 +61,7 @@ export function SubscriptionPlanCard({
           ></div>
         </div>
       </div>
-      {/* <PricingModal /> */}
+      <PricingModal />
     </div>
   )
 }
-

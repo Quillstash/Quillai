@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function AiArticlesPage() {
   const session = await auth();
-  if (!session?.user) redirect('/sign-in');
+  if (!session?.user) redirect('/login');
 
   const aiArticles = await db.article.findMany({
     where: {
