@@ -1,15 +1,21 @@
 import OpenAI from 'openai';
 import { searchUnsplashImages } from './upsplash';
 import DOMPurify from 'isomorphic-dompurify';
-import { ArticleGenerationParams } from '@/types/articles';
+import { PrismaClient,  } from '@prisma/client';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+interface ArticleGenerationInput {
+  keyword: string;
+  userId: string;
+}
+
 interface GeneratedContent {
   html: string;
   imagePrompts: string[];
+  title: string;
 }
 
 // Helper function to clean unwanted tags or text
@@ -24,7 +30,37 @@ function cleanContent(content: string): string {
   return withoutUnwantedTags.trim();
 }
 
-async function generateImagePrompts(params: ArticleGenerationParams): Promise<string[]> {
+async function generateTitle(keyword: string): Promise<string> {
+  const titlePrompt = `
+    Generate a compelling, SEO-optimized article title about "${keyword}".
+    The title should be:
+    - Engaging and click-worthy
+    - Between 40-60 characters
+    - Include the keyword naturally
+    - Promise value to the reader
+    - High volume Low keyword difficulty
+    
+    Return only the title text, output without "", nothing else.
+  `;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: "You are an expert SEO copywriter specializing in creating engaging titles." },
+      { role: "user", content: titlePrompt },
+    ],
+    temperature: 0.7,
+    max_tokens: 50,
+  });
+  console.log(completion.choices[0].message)
+  const rawTitle = completion.choices[0].message?.content?.trim() || '';
+
+  // Remove unnecessary punctuation or quotes
+  const cleanedTitle = rawTitle.replace(/^"|"$/g, ''); // Remove surrounding double quotes if present
+  return cleanedTitle;
+}
+
+async function generateImagePrompts(title: string, keyword: string): Promise<string[]> {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -35,7 +71,7 @@ async function generateImagePrompts(params: ArticleGenerationParams): Promise<st
         },
         {
           role: "user",
-          content: `Generate 3, simple, single word image search prompt for upsplash based of the article headings: ${params.title}}`
+          content: `Generate 3, simple, single word image search prompt for upsplash based of the article title: ${title} and keyword: ${keyword}`
         }
       ],
       temperature: 0.7,
@@ -50,17 +86,34 @@ async function generateImagePrompts(params: ArticleGenerationParams): Promise<st
   }
 }
 
-export async function generateArticleContent(params: ArticleGenerationParams): Promise<GeneratedContent> {
+export async function generateArticleContent(
+  { keyword, userId }: ArticleGenerationInput,
+  prisma: PrismaClient
+): Promise<GeneratedContent> {
+  // Fetch user preferences
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      preferredTone: true,
+      targetAudience: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const title = await generateTitle(keyword);
+
   const basePrompt = `
     Generate a high-quality, SEO-optimized, and human-like article using the following guidelines:
     
-    Topic: ${params.title}
-    Target audience: ${params.targetAudience}
+    Topic: ${title}
+    Target audience: ${user.targetAudience || 'general readers'}
     Article length: 1000 - 1200 words
-    Tone: ${params.tone}
+    Tone: ${user.preferredTone || 'professional'}
     
-    Primary keywords: ${params.keywords.slice(0, 3).join(', ')}
-    Secondary keywords: ${params.keywords.slice(3).join(', ')}
+    Keyword to optimize for: ${keyword}
     
     Article structure:
     - Engaging introduction with a hook
@@ -71,15 +124,15 @@ export async function generateArticleContent(params: ArticleGenerationParams): P
     - Conclusion with a thought-provoking question
     
     SEO optimization:
-    - Include primary keyword in the first paragraph and headings
-    - Use secondary keywords naturally throughout
+    - Include keyword in the first paragraph and headings
+    - Use keyword variations naturally throughout
     - Include internal and external link placeholders
     - Offer a unique perspective or angle on the topic
     - Include up-to-date information and recent developments
     - Use transitional phrases between paragraphs
     
     Content guidelines:
-    - Write in a ${params.tone} tone
+    - Write in a ${user.preferredTone || 'professional'} tone
     - Use active voice and present tense
     - Include current statistics and studies
     - Provide actionable insights
@@ -89,9 +142,9 @@ export async function generateArticleContent(params: ArticleGenerationParams): P
   `;
 
   const sectionPrompts: Record<string, string> = {
-    Introduction: `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${params.title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
-    "Body Section 1": `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${params.title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
-    "Body Section 2": `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${params.title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
+    Introduction: `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
+    "Body Section 1": `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
+    "Body Section 2": `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
     Conclusion: `${basePrompt}\n\nGenerate only the "Conclusion" section. Summarize the key points of the article, provide a thought-provoking question or call to action, and leave the reader with a memorable takeaway. Avoid repeating content from the Introduction or Body Sections.`,
   };
 
@@ -118,17 +171,15 @@ export async function generateArticleContent(params: ArticleGenerationParams): P
     }
 
     const fullContent = generatedSections.join('\n');
-
     const sanitizedContent = DOMPurify.sanitize(fullContent);
-
     const cleanedContent = cleanContent(sanitizedContent);
-    console.log('Cleaned content:', cleanedContent);
-
-    const imagePrompts = await generateImagePrompts(params);
+    
+    const imagePrompts = await generateImagePrompts(title, keyword);
 
     return {
       html: cleanedContent,
       imagePrompts,
+      title,
     };
   } catch (error) {
     console.error('Error generating article:', error);
@@ -136,7 +187,9 @@ export async function generateArticleContent(params: ArticleGenerationParams): P
   }
 }
 
-export async function enhanceArticleWithImages(params: ArticleGenerationParams, content?: GeneratedContent): Promise<string> {
+export async function enhanceArticleWithImages(
+  content: GeneratedContent
+): Promise<string> {
   if (!content || !content.html || content.imagePrompts.length < 2) {
     console.error('Insufficient content or image prompts');
     return '';
@@ -186,4 +239,3 @@ export async function enhanceArticleWithImages(params: ArticleGenerationParams, 
     throw new Error('Failed to enhance article with images.');
   }
 }
-

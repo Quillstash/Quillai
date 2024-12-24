@@ -6,31 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus } from 'lucide-react'
 import { ArticleGeneratorModal } from "@/components/article/articleGeneratorModal"
 import { ArticlesTable } from "@/components/article/article-Table"
-
-// Define types based on the Prisma schema
-type Article = {
-  id: string;
-  title: string;
-  description: string;
-  metaDescription?: string | null;
-  keywords: string[];
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: string;
-  generationCost: number;
-  generatingState: 'GENERATED' | 'GENERATING' | 'DRAFT' | 'CANCELLED';
-  coverImage?: string | null;
-  user: {
-    name: string | null;
-    image: string | null;
-  };
-}
+import { Article } from "@prisma/client"
 
 export type ArticleGenerationStatus = {
   id?: string;
-  title: string;
   status: 'generating' | 'success' | 'error';
+  message?: string;
 }
 
 export default function PageComponent({ initialArticles }: { initialArticles: Article[] }) {
@@ -39,7 +20,6 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
   const [generationStatus, setGenerationStatus] = useState<ArticleGenerationStatus | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Fetch the latest articles from the server
   const refreshArticles = useCallback(async () => {
     setIsRefreshing(true)
     try {
@@ -55,6 +35,7 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
       }
 
       const latestArticles = await response.json()
+      console.log(latestArticles)
       setArticles(latestArticles)
     } catch (error) {
       console.error('Error refreshing articles:', error)
@@ -63,9 +44,9 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
     }
   }, [])
 
-  // Effect to handle article refresh when generation is successful
   useEffect(() => {
     if (generationStatus?.status === 'success') {
+      console.log("if success", generationStatus)
       const refreshTimer = setTimeout(() => {
         refreshArticles()
       }, 1000) // Small delay to allow for backend processing
@@ -74,32 +55,36 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
     }
   }, [generationStatus, refreshArticles])
 
-  const handleGenerationStart = useCallback((title: string) => {
-    setGenerationStatus({
-      title,
-      status: 'generating'
+  const handleGenerationStart = useCallback(() => {
+    setGenerationStatus({ 
+      status: 'generating',
+      message: 'Generating your article...' 
     })
   }, [])
 
-  const handleArticleGenerated = useCallback((newArticle: Article) => {
+  const handleArticleGenerated = useCallback(async (newArticle: Article) => {
+    console.log(newArticle)
     setGenerationStatus({
-      id: newArticle.id,
-      title: newArticle.title,
-      status: 'success'
-    })
+      id: newArticle?.id ?? 'Unknown ID',
+      status: 'success',
+      message: newArticle?.title 
+        ? `Article generated successfully: ${newArticle.title}`
+        : 'Article generated successfully'
+    });
 
-    refreshArticles()
+    refreshArticles();
 
     setTimeout(() => {
-      setGenerationStatus(null)
-    }, 2000)
+      setGenerationStatus(null);
+    }, 2000);
   }, [refreshArticles])
 
   const handleGenerationError = useCallback(() => {
-    setGenerationStatus(prevStatus => prevStatus 
-      ? { ...prevStatus, status: 'error' }
-      : null
-    )
+    console.log("if failed", generationStatus)
+    setGenerationStatus({ 
+      status: 'error',
+      message: 'Failed to generate article'
+    })
 
     setTimeout(() => {
       setGenerationStatus(null)
@@ -115,7 +100,7 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
           {isRefreshing ? 'Refreshing...' : 'New Article'}
         </Button>
       </div>
-      
+
       {generationStatus && (
         <div className={`
           px-4 py-2 text-center 
@@ -123,9 +108,7 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
           ${generationStatus.status === 'success' && 'bg-green-100 text-green-800'}
           ${generationStatus.status === 'error' && 'bg-red-100 text-red-800'}
         `}>
-          {generationStatus.status === 'generating' && `Generating article: ${generationStatus.title}`}
-          {generationStatus.status === 'success' && `Article generated successfully: ${generationStatus.title}`}
-          {generationStatus.status === 'error' && `Failed to generate article: ${generationStatus.title}`}
+          {generationStatus.message}
         </div>
       )}
 
@@ -182,4 +165,3 @@ export default function PageComponent({ initialArticles }: { initialArticles: Ar
     </div>
   )
 }
-

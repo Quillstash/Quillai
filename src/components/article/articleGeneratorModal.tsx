@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Wand2 } from 'lucide-react'
@@ -11,22 +11,11 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Post } from '@/db/schema'
-import KeywordInput from '../keyword/KeywordInput'
+import { Article } from '@prisma/client'
 
+// Updated schema for single keyword
 const formSchema = z.object({
-  title: z.string().min(1, 'Title cannot be empty').max(100, 'Title is too long'),
-  keywords: z.array(z.string()).min(1, 'At least one keyword is required'),
-  tone: z.enum(['professional', 'casual', 'academic', 'conversational', 'humorous', 'persuasive']),
-  targetAudience: z.string().min(1, 'Target audience is required'),
+  keyword: z.string().min(1, 'Keyword is required').max(50, 'Keyword is too long'),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -34,8 +23,8 @@ type FormValues = z.infer<typeof formSchema>
 interface ArticleGeneratorModalProps {
   isOpen: boolean
   onClose: () => void
-  onGenerationStart: (title: string) => void
-  onArticleGenerated: (article: Post) => void
+  onGenerationStart: () => void
+  onArticleGenerated: (article: Article) => void
   onGenerationError: () => void
 }
 
@@ -48,22 +37,22 @@ export function ArticleGeneratorModal({
 }: ArticleGeneratorModalProps) {
   const [isGenerating, setIsGenerating] = useState(false)
 
-  const { control, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors }, 
+    reset 
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      keywords: [],
-      tone: 'professional',
-      targetAudience: '',
+      keyword: '',
     },
   })
 
   const handleGenerate = async (data: FormValues) => {
     setIsGenerating(true)
     onClose()
-    
-    // Notify parent component about generation start
-    onGenerationStart(data.title)
+    onGenerationStart()
 
     try {
       const response = await fetch('/api/generate-article', {
@@ -71,17 +60,12 @@ export function ArticleGeneratorModal({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ keyword: data.keyword }), // Send single keyword
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate article')
-      }
-
+      
       const result = await response.json()
-      if (result.success && result.post) {
-        onArticleGenerated(result.post)
+      if (result.success || result.article) {
+        onArticleGenerated(result.article)
         reset()
       } else {
         throw new Error('Failed to generate article')
@@ -101,71 +85,26 @@ export function ArticleGeneratorModal({
           <DialogTitle>Generate New Article</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(handleGenerate)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Article Title</label>
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  placeholder="Enter article title"
-                  className="w-full"
-                />
-              )}
+          <div className="space-y-2">
+            <label htmlFor="keyword" className="text-sm font-medium">
+              Keyword
+            </label>
+            <Input
+              id="keyword"
+              placeholder="Enter a keyword..."
+              {...register('keyword')}
+              className={errors.keyword ? 'border-red-500' : ''}
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
+            {errors.keyword && (
+              <p className="text-sm text-red-500">{errors.keyword.message}</p>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Keywords</label>
-            <KeywordInput
-              control={control}
-              error={errors.keywords?.message}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Target Audience</label>
-            <Controller
-              name="targetAudience"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  {...field}
-                  placeholder="Describe your target audience"
-                  className="w-full"
-                />
-              )}
-            />
-            {errors.targetAudience && <p className="text-red-500 text-sm mt-1">{errors.targetAudience.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Tone</label>
-            <Controller
-              name="tone"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a tone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="casual">Casual</SelectItem>
-                    <SelectItem value="academic">Academic</SelectItem>
-                    <SelectItem value="conversational">Conversational</SelectItem>
-                    <SelectItem value="humorous">Humorous</SelectItem>
-                    <SelectItem value="persuasive">Persuasive</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.tone && <p className="text-red-500 text-sm mt-1">{errors.tone.message}</p>}
-          </div>
-
-          <Button type="submit" disabled={isGenerating} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isGenerating} 
+            className="w-full"
+          >
             {isGenerating ? (
               'Generating...'
             ) : (

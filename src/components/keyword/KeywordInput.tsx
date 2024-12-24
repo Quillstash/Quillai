@@ -4,13 +4,23 @@ import { useController, Control } from 'react-hook-form';
 import { z } from 'zod';
 import ErrorMessage from '../ui/error-message';
 
-// Define the schema for the form values
+// Define the schema
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formSchema = z.object({
+  title: z.string(),
   keywords: z.array(z.string()).max(8, "Maximum 8 keywords allowed"),
-  // Add other form fields here
+  tone: z.enum([
+    "professional",
+    "casual",
+    "academic",
+    "conversational",
+    "humorous",
+    "persuasive",
+  ]),
+  targetAudience: z.string(),
+  
 });
 
-// Infer the type from the schema
 type FormValues = z.infer<typeof formSchema>;
 
 interface KeywordInputProps {

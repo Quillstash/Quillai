@@ -34,10 +34,13 @@ export default async function AiArticlesPage() {
     },
   });
 
-  // Transform the data to match the expected structure
+  // Transform the data to match the expected Article type with author information
   const transformedArticles = aiArticles.map(article => ({
     ...article,
-    user: article.author,
+    author: {
+      name: article.author.name,
+      image: article.author.image,
+    },
   }));
 
   return <PageComponent initialArticles={transformedArticles} />;

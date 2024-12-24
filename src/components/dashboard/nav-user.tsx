@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import {  ChevronsUpDown, Group, LogOut, Sparkles, User } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { ChevronsUpDown, Group, LogOut, Sparkles, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,7 +18,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from "next-auth/react";
+import Link from "next/link";
 
 interface UserSession {
   user?: {
@@ -41,9 +42,9 @@ export function NavUser() {
   }, []);
 
   const user = session?.user || {};
-  const name = user.name || 'Guest';
-  const email = user.email || 'guest@example.com';
-  const avatar = user.image || '/default-avatar.png';
+  const name = user.name || "Guest";
+  const email = user.email || "guest@example.com";
+  const avatar = user.image || "/default-avatar.png";
 
   return (
     <SidebarMenu>
@@ -56,7 +57,9 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={avatar} alt={name} />
-                <AvatarFallback className="rounded-lg">{name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {name.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{name}</span>
@@ -75,7 +78,9 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={avatar} alt={name} />
-                  <AvatarFallback className="rounded-lg">{name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {name.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{name}</span>
@@ -87,22 +92,26 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Upgrade to Pro
+                View Pricing
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Profile
+                <Link href="setting/profile" className="flex ">
+                  <User className="mr-2 h-4 w-4" />
+                  <span className="ml-2">Profile</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Group className="mr-2 h-4 w-4" />
-                Team
+                <Link href="/team" className="flex ">
+                  <Group className="mr-2 h-4 w-4" />
+                  <span className="ml-2">Team</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
@@ -112,4 +121,3 @@ export function NavUser() {
     </SidebarMenu>
   );
 }
-

@@ -1,12 +1,30 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Container from '@/components/container';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
+import { getSession } from 'next-auth/react';
 
 function Page() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      // Replace with your session-checking logic
+      const session = await getSession(); // Example session-checking function
+      if (session) {
+        router.replace('/articles'); // Redirect to /articles if session exists
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
   return (
     <div>
-      
       <section>
         <Container className='grid place-items-center py-12 md:py-16 lg:py-32'>
           <div>
@@ -48,7 +66,6 @@ function Page() {
           </div>
         </Container>
       </section>
-      {/*  */}
       <section>
         <Container className='py-24'>
           <div className='mb-12 px-6 lg:px-8'>

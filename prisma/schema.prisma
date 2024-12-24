@@ -48,13 +48,16 @@ model User {
   accounts           Account[]
   sessions           Session[]
   payments           Payment[]
-  credits            Int       @default(5)  // Default to 5 credits for free plan
+  credits            Int       @default(5)
   creditsUsed        Int       @default(0)
   plan               PLANS     @default(FREE)
   subscriptionId     String?
   subscriptionStatus String?
   planId             String?
   currentPeriodEnd   DateTime?
+  preferredTone      String?   @default("professional")
+  targetAudience     String?
+  onboardingCompleted Boolean  @default(false)
 }
 
 model Payment {

@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import KeywordInput from "@/components/keyword/KeywordInput";
+// import KeywordInput from "@/components/keyword/KeywordInput";
 
 interface ArticleComponentProps {
   article: Article;
@@ -34,8 +34,8 @@ export default function ArticleComponent({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
-
-  const { control, handleSubmit, setValue, watch } = useForm<ArticleValues>({
+  // control,
+  const {  handleSubmit, setValue, watch } = useForm<ArticleValues>({
     defaultValues: {
       title: initialArticle.title,
       content: initialArticle.content,
@@ -106,7 +106,7 @@ export default function ArticleComponent({
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <Link
-          href="/ai-articles"
+          href="/articles"
           className="inline-flex items-center text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -211,7 +211,7 @@ export default function ArticleComponent({
         </Card>
 
         {/* Keywords Section */}
-        <Card className="p-6">
+        {/* <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Keywords</h3>
           {isEditing ? (
             <KeywordInput control={control} />
@@ -224,7 +224,7 @@ export default function ArticleComponent({
               ))}
             </div>
           )}
-        </Card>
+        </Card> */}
 
         {/* Content Section */}
         <Card className="p-6">
