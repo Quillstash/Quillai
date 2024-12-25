@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Chip, Input } from '@nextui-org/react';
 import { useController, Control } from 'react-hook-form';
 import { z } from 'zod';
@@ -39,7 +39,7 @@ function KeywordInput({ control }: KeywordInputProps) {
     defaultValue: [],
   });
 
-  const keywords = Array.isArray(value) ? value : [];
+  const keywords = useMemo(() => Array.isArray(value) ? value : [], [value]);
 
   const addKeyword = () => {
     const trimmedValue = inputValue.trim();

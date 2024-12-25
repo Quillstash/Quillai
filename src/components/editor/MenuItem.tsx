@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react'; // Or your icon library
+import { LucideIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 
 type MenuItemProps = {
@@ -18,12 +18,10 @@ export default function MenuItem({
   return (
     <Button
       type='button'
-      onPress={action}
+      onClick={action}
       title={title}
-      isIconOnly
-      radius='sm'
-      variant={isActive && isActive() ? 'flat' : 'ghost'}
-      size='sm'
+      variant={isActive && isActive() ? 'default' : 'ghost'}
+      size='icon'
       className='border-none'
       
     >

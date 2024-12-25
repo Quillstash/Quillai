@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'View and manage your AI-generated articles',
 };
 
-export default async function AiArticlesPage() {
+async function ArticlesPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
@@ -18,11 +18,11 @@ export default async function AiArticlesPage() {
     where: {
       authorId: session.user.id,
       generatingState: {
-        not: 'CANCELLED'
-      }
+        not: 'CANCELLED',
+      },
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: 'desc',
     },
     include: {
       author: {
@@ -34,15 +34,7 @@ export default async function AiArticlesPage() {
     },
   });
 
-  // Transform the data to match the expected Article type with author information
-  const transformedArticles = aiArticles.map(article => ({
-    ...article,
-    author: {
-      name: article.author.name,
-      image: article.author.image,
-    },
-  }));
-
-  return <PageComponent initialArticles={transformedArticles} />;
+  return <PageComponent initialArticles={aiArticles} />;
 }
 
+export default ArticlesPage;

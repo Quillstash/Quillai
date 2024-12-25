@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 // import KeywordInput from "@/components/keyword/KeywordInput";
+import Image from "next/image";
 
 interface ArticleComponentProps {
   article: Article;
@@ -161,7 +162,8 @@ export default function ArticleComponent({
           <h3 className="text-lg font-semibold mb-4">Cover Image</h3>
           {formValues.coverImage && (
             <div className="relative w-full h-[300px] mb-4">
-              <img
+              {/* @eslint-ignore @next/next/no-img-element */}
+              <Image
                 src={formValues.coverImage}
                 alt={formValues.title}
                 className="absolute inset-0 w-full h-full object-cover rounded-lg"

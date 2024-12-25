@@ -87,7 +87,6 @@ async function handleSubscriptionChange(body: any) {
     });
   }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCancelled(body: any) {
   const userId = body.meta.custom_data.user_id;
 

@@ -4,7 +4,10 @@ import { z } from 'zod';
 import db from '@/lib/db';
 
 const articleUpdateSchema = z.object({
-  title: z.string().min(1, 'Title cannot be empty').max(100, 'Title is too long'),
+  title: z
+    .string()
+    .min(1, 'Title cannot be empty')
+    .max(100, 'Title is too long'),
   description: z.string().nullable(),
   content: z.string(),
   coverImage: z.string().url().nullable(),
@@ -22,14 +25,16 @@ async function validateRequest() {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const id = (await params).id;
+
   try {
     const user = await validateRequest();
     if (!user) return;
 
     const deletedArticle = await db.article.delete({
-      where: { id: params.id, authorId: user.id },
+      where: { id: id, authorId: id },
     });
 
     if (!deletedArticle) {
@@ -48,8 +53,10 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const id = (await params).id;
+
   try {
     const user = await validateRequest();
     if (!user) return;
@@ -58,7 +65,7 @@ export async function PATCH(
     const validatedData = articleUpdateSchema.parse(body);
 
     const updatedArticle = await db.article.update({
-      where: { id: params.id, authorId: user.id },
+      where: { id: id, authorId: id },
       data: {
         ...validatedData,
         updatedAt: new Date(),
@@ -72,12 +79,15 @@ export async function PATCH(
     return NextResponse.json({ success: true, article: updatedArticle });
   } catch (error) {
     console.error('Update article error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Validation error',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Validation error',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(
@@ -86,4 +96,3 @@ export async function PATCH(
     );
   }
 }
-

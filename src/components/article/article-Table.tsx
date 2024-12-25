@@ -17,8 +17,16 @@ import { format } from "date-fns";
 import { DeleteConfirmationModal } from "./delete-confirm";
 import Link from "next/link";
 
+
+interface ArticleWithAuthor extends Article {
+  author: {
+    image: string | null;
+    name: string | null;
+  };
+}
+
 interface ArticlesTableProps {
-  articles: Article[];
+  articles: ArticleWithAuthor[];
   generationStatus: {
     id?: string;
     status: "generating" | "success" | "error";
@@ -56,8 +64,10 @@ export function ArticlesTable({
     if (!sortConfig) return 0;
 
     const { key, direction } = sortConfig;
-    if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-    if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+    const valueA = a[key] ?? '';
+    const valueB = b[key] ?? '';
+    if (valueA < valueB) return direction === "asc" ? -1 : 1;
+    if (valueA > valueB) return direction === "asc" ? 1 : -1;
     return 0;
   });
 

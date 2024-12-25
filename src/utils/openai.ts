@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { searchUnsplashImages } from './upsplash';
 import DOMPurify from 'isomorphic-dompurify';
-import { PrismaClient,  } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,7 +24,10 @@ function cleanContent(content: string): string {
   const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, '');
 
   // Remove extra HTML tags if necessary
-  const withoutUnwantedTags = withoutCodeBlocks.replace(/<(?!\/?(p|h[1-6]|b|i|ul|ol|li|a|blockquote|span|strong|em|br|hr)(?=>|\s.*>))\/?.*?>/g, '');
+  const withoutUnwantedTags = withoutCodeBlocks.replace(
+    /<(?!\/?(p|h[1-6]|b|i|ul|ol|li|a|blockquote|span|strong|em|br|hr)(?=>|\s.*>))\/?.*?>/g,
+    ''
+  );
 
   // Optionally trim or normalize white spaces
   return withoutUnwantedTags.trim();
@@ -44,15 +47,19 @@ async function generateTitle(keyword: string): Promise<string> {
   `;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: 'gpt-3.5-turbo',
     messages: [
-      { role: "system", content: "You are an expert SEO copywriter specializing in creating engaging titles." },
-      { role: "user", content: titlePrompt },
+      {
+        role: 'system',
+        content:
+          'You are an expert SEO copywriter specializing in creating engaging titles.',
+      },
+      { role: 'user', content: titlePrompt },
     ],
     temperature: 0.7,
     max_tokens: 50,
   });
-  console.log(completion.choices[0].message)
+  console.log(completion.choices[0].message);
   const rawTitle = completion.choices[0].message?.content?.trim() || '';
 
   // Remove unnecessary punctuation or quotes
@@ -60,26 +67,33 @@ async function generateTitle(keyword: string): Promise<string> {
   return cleanedTitle;
 }
 
-async function generateImagePrompts(title: string, keyword: string): Promise<string[]> {
+async function generateImagePrompts(
+  title: string,
+  keyword: string
+): Promise<string[]> {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-3.5-turbo',
       messages: [
         {
-          role: "system",
-          content: "Generate concise, descriptive image prompts for Unsplash searches based on article headings. Focus on tech-related, professional imagery."
+          role: 'system',
+          content:
+            'Generate concise, descriptive image prompts for Unsplash searches based on article headings. Focus on tech-related, professional imagery.',
         },
         {
-          role: "user",
-          content: `Generate 3, simple, single word image search prompt for upsplash based of the article title: ${title} and keyword: ${keyword}`
-        }
+          role: 'user',
+          content: `Generate 3, simple, single word image search prompt for upsplash based of the article title: ${title} and keyword: ${keyword}`,
+        },
       ],
       temperature: 0.7,
     });
 
     const promptsText = completion.choices[0].message.content || '';
     console.log('Generated image prompts:', promptsText);
-    return promptsText.split('\n').filter(prompt => prompt.trim()).slice(0, 2);
+    return promptsText
+      .split('\n')
+      .filter((prompt) => prompt.trim())
+      .slice(0, 2);
   } catch (error) {
     console.error('Error generating image prompts:', error);
     throw new Error('Failed to generate image prompts');
@@ -143,8 +157,8 @@ export async function generateArticleContent(
 
   const sectionPrompts: Record<string, string> = {
     Introduction: `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
-    "Body Section 1": `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
-    "Body Section 2": `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
+    'Body Section 1': `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
+    'Body Section 2': `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
     Conclusion: `${basePrompt}\n\nGenerate only the "Conclusion" section. Summarize the key points of the article, provide a thought-provoking question or call to action, and leave the reader with a memorable takeaway. Avoid repeating content from the Introduction or Body Sections.`,
   };
 
@@ -154,10 +168,14 @@ export async function generateArticleContent(
     for (const section in sectionPrompts) {
       const sectionPrompt = sectionPrompts[section];
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: 'gpt-3.5-turbo',
         messages: [
-          { role: "system", content: "You are an expert tech content writer specializing in SEO-optimized articles." },
-          { role: "user", content: sectionPrompt },
+          {
+            role: 'system',
+            content:
+              'You are an expert tech content writer specializing in SEO-optimized articles.',
+          },
+          { role: 'user', content: sectionPrompt },
         ],
         temperature: 0.6,
         max_tokens: 1500,
@@ -173,7 +191,7 @@ export async function generateArticleContent(
     const fullContent = generatedSections.join('\n');
     const sanitizedContent = DOMPurify.sanitize(fullContent);
     const cleanedContent = cleanContent(sanitizedContent);
-    
+
     const imagePrompts = await generateImagePrompts(title, keyword);
 
     return {
@@ -203,12 +221,12 @@ export async function enhanceArticleWithImages(
     if (titleImages.length > 0) {
       const titleImage = titleImages[0];
       const titleImageHtml = `
-  <figure class="my-8">
-    <img src="${titleImage.url}" alt="${titleImage.alt}" class="rounded-lg shadow-md w-full" />
-    <figcaption class="text-sm text-gray-500 mt-2">
-      Photo by <a href="${titleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${titleImage.credit.name}</a> on Unsplash
-    </figcaption>
-  </figure>`;
+        <figure class="my-8">
+          <img src="${titleImage.url}" alt="${titleImage.alt}" class="rounded-lg shadow-md w-full" />
+          <figcaption class="text-sm text-gray-500 mt-2">
+            Photo by <a href="${titleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${titleImage.credit.name}</a> on Unsplash
+          </figcaption>
+        </figure>`;
       enhancedHtml = titleImageHtml + enhancedHtml;
     }
 
@@ -220,12 +238,12 @@ export async function enhanceArticleWithImages(
     if (middleImages.length > 0) {
       const middleImage = middleImages[0];
       const middleImageHtml = `
-  <figure class="my-8">
-    <img src="${middleImage.url}" alt="${middleImage.alt}" class="rounded-lg shadow-md w-full" />
-    <figcaption class="text-sm text-gray-500 mt-2">
-      Photo by <a href="${middleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${middleImage.credit.name}</a> on Unsplash
-    </figcaption>
-  </figure>`;
+        <figure class="my-8">
+          <img src="${middleImage.url}" alt="${middleImage.alt}" class="rounded-lg shadow-md w-full" />
+          <figcaption class="text-sm text-gray-500 mt-2">
+            Photo by <a href="${middleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${middleImage.credit.name}</a> on Unsplash
+          </figcaption>
+        </figure>`;
 
       paragraphs.splice(middleIndex, 0, middleImageHtml);
     }

@@ -14,7 +14,7 @@ import {
   Undo,
   CodeSquare,
 } from 'lucide-react';
-import { Divider } from '@nextui-org/divider';
+import { Separator } from '../ui/separator';
 // import ImageItem from './ImageItem';
 
 export default function MenuBar({ editor }: { editor: Editor }) {
@@ -92,7 +92,7 @@ export default function MenuBar({ editor }: { editor: Editor }) {
       {items.map((item, index) => (
         <Fragment key={index}>
           {item.type === 'divider' ? (
-            <Divider orientation='vertical' />
+            <Separator orientation='vertical' />
           ) : (
             <MenuItem {...item} />
           )}

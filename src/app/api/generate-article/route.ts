@@ -15,7 +15,7 @@ const articleGenerationSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         slug: '',
         content: '',
         keywords: [validatedData.keyword],
-        authorId: session.user.id,
+        authorId: session.user.id!,
         generatingState: 'GENERATING',
         generationCost: 2,
       },
