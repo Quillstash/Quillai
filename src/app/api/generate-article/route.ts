@@ -3,10 +3,10 @@ import { auth } from '@/auth';
 import { z } from 'zod';
 
 import db from '@/lib/db';
-import { searchUnsplashImages } from '@/utils/upsplash';
-import { generateDescription } from '@/utils/generate-description';
-import { generateSlug } from '@/lib/services';
-import {  generateArticleContent } from '@/utils/openai';
+// import { searchUnsplashImages } from '@/utils/upsplash';
+// import { generateDescription } from '@/utils/generate-description';
+// import { generateSlug } from '@/lib/services';
+// import {  generateArticleContent } from '@/utils/openai';
 
 const articleGenerationSchema = z.object({
   keyword: z.string().min(1, 'Keyword cannot be empty').max(50, 'Keyword is too long'),
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
     console.log('Initial article created');
 
     // Start the content generation process
-    await generateArticleContentAndUpdate(newArticle.id, validatedData.keyword);
-    console.log("Article data updated");
+    // await generateArticleContentAndUpdate(newArticle.id, validatedData.keyword);
+    // console.log("Article data updated");
 
     const updatedArticle = await db.article.findUnique({
       where: { id: newArticle.id },
@@ -79,75 +79,75 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function generateArticleContentAndUpdate(articleId: string, keyword: string) {
-  try {
-    console.log('Starting article generation for article:', articleId);
+// export async function generateArticleContentAndUpdate(articleId: string, keyword: string) {
+//   try {
+//     console.log('Starting article generation for article:', articleId);
 
-    // Get user preferences from database
-    const article = await db.article.findUnique({
-      where: { id: articleId },
-      include: { author: true },
-    });
+//     // Get user preferences from database
+//     const article = await db.article.findUnique({
+//       where: { id: articleId },
+//       include: { author: true },
+//     });
 
-    if (!article || !article.author) {
-      throw new Error('Article or author not found');
-    }
+//     if (!article || !article.author) {
+//       throw new Error('Article or author not found');
+//     }
 
-    // Generate article content with our refactored function
-    const generatedContent = await generateArticleContent(
-      { 
-        keyword,
-        userId: article.author.id 
-      },
+//     // Generate article content with our refactored function
+//     const generatedContent = await generateArticleContent(
+//       { 
+//         keyword,
+//         userId: article.author.id 
+//       },
    
-    );
+//     );
 
-    // Generate slug from the AI-generated title
-    const slug = generateSlug(generatedContent.title);
+//     // Generate slug from the AI-generated title
+//     const slug = generateSlug(generatedContent.title);
 
-    // Get cover image using the keyword
-    const coverImages = await searchUnsplashImages(keyword, 1);
+//     // Get cover image using the keyword
+//     const coverImages = await searchUnsplashImages(keyword, 1);
 
-    // Generate meta description using the AI-generated title
-    const metaDescription = await generateDescription(generatedContent.title);
+//     // Generate meta description using the AI-generated title
+//     const metaDescription = await generateDescription(generatedContent.title);
 
-    // Enhance article with embedded images
-    // const enhancedContent = await enhanceArticleWithImages(generatedContent);
-    // console.log('Enhanced content:', enhancedContent);
+//     // Enhance article with embedded images
+//     // const enhancedContent = await enhanceArticleWithImages(generatedContent);
+//     // console.log('Enhanced content:', enhancedContent);
 
-    // Use a transaction to update both the article and user credits atomically
-    await db.$transaction(async (tx) => {
-      // Update the article with all generated content
-      await tx.article.update({
-        where: { id: articleId },
-        data: {
-          title: generatedContent.title,
-          slug: slug,
-          // content: enhancedContent,
-          metaDescription: metaDescription || '',
-          coverImage: coverImages[0]?.url || '',
-          generatingState: 'GENERATED',
-        },
-      });
+//     // Use a transaction to update both the article and user credits atomically
+//     await db.$transaction(async (tx) => {
+//       // Update the article with all generated content
+//       await tx.article.update({
+//         where: { id: articleId },
+//         data: {
+//           title: generatedContent.title,
+//           slug: slug,
+//           // content: enhancedContent,
+//           metaDescription: metaDescription || '',
+//           coverImage: coverImages[0]?.url || '',
+//           generatingState: 'GENERATED',
+//         },
+//       });
 
-      // Deduct credits and update creditsUsed for the user
-      await tx.user.update({
-        where: { id: article.author.id },
-        data: {
+//       // Deduct credits and update creditsUsed for the user
+//       await tx.user.update({
+//         where: { id: article.author.id },
+//         data: {
         
-          creditsUsed: { increment: 2 },
-        },
-      });
-    });
+//           creditsUsed: { increment: 2 },
+//         },
+//       });
+//     });
 
-    console.log('Article generation and credit update completed for article:', articleId);
-  } catch (error) {
-    console.error('Error generating article content:', error);
-    // Update the article to indicate generation failure
-    await db.article.update({
-      where: { id: articleId },
-      data: { generatingState: 'CANCELLED' },
-    });
-    throw error;
-  }
-}
+//     console.log('Article generation and credit update completed for article:', articleId);
+//   } catch (error) {
+//     console.error('Error generating article content:', error);
+//     // Update the article to indicate generation failure
+//     await db.article.update({
+//       where: { id: articleId },
+//       data: { generatingState: 'CANCELLED' },
+//     });
+//     throw error;
+//   }
+// }
