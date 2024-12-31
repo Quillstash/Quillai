@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^1.0.11",
     "@auth/prisma-adapter": "^2.7.4",
     "@edgestore/react": "^0.2.2",
     "@edgestore/server": "^0.2.2",
@@ -39,6 +40,7 @@
     "@tiptap/pm": "^2.10.3",
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
+    "ai": "^4.0.22",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

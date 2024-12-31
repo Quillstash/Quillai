@@ -203,6 +203,8 @@ export default function PageComponent({
         onGenerationStart={handleGenerationStart}
         onArticleGenerated={handleArticleGenerated}
         onGenerationError={handleGenerationError}
+        // onRefresh={refreshArticles}
+
       />
     </div>
   );

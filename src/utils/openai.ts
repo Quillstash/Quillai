@@ -1,11 +1,10 @@
-import OpenAI from 'openai';
-import { searchUnsplashImages } from './upsplash';
-import DOMPurify from 'isomorphic-dompurify';
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { PrismaClient } from '@prisma/client';
+import DOMPurify from 'isomorphic-dompurify';
+import { searchUnsplashImages } from './upsplash';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const prisma = new PrismaClient();
 
 interface ArticleGenerationInput {
   keyword: string;
@@ -18,99 +17,57 @@ interface GeneratedContent {
   title: string;
 }
 
-// Helper function to clean unwanted tags or text
-function cleanContent(content: string): string {
-  // Remove triple backticks and code block markers
+export function cleanContent(content: string): string {
   const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, '');
-
-  // Remove extra HTML tags if necessary
   const withoutUnwantedTags = withoutCodeBlocks.replace(
     /<(?!\/?(p|h[1-6]|b|i|ul|ol|li|a|blockquote|span|strong|em|br|hr)(?=>|\s.*>))\/?.*?>/g,
     ''
   );
-
-  // Optionally trim or normalize white spaces
   return withoutUnwantedTags.trim();
 }
 
-async function generateTitle(keyword: string): Promise<string> {
-  const titlePrompt = `
-    Generate a compelling, SEO-optimized article title about "${keyword}".
-    The title should be:
-    - Engaging and click-worthy
-    - Between 40-60 characters
-    - Include the keyword naturally
-    - Promise value to the reader
-    - High volume Low keyword difficulty
-    
-    Return only the title text, output without "", nothing else.
-  `;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+export async function generateTitle(keyword: string): Promise<string> {
+  const { text } = await generateText({
+    model: openai('gpt-3.5-turbo'),
     messages: [
       {
         role: 'system',
-        content:
-          'You are an expert SEO copywriter specializing in creating engaging titles.',
+        content: 'You are an expert SEO copywriter specializing in creating engaging titles.',
       },
-      { role: 'user', content: titlePrompt },
+      {
+        role: 'user',
+        content: `Generate a compelling, SEO-optimized article title about "${keyword}". The title should be engaging, 40-60 characters, include the keyword naturally, promise value to the reader, and have high volume and low keyword difficulty. Return only the title text, without quotes or any other content.`,
+      },
     ],
-    temperature: 0.7,
-    max_tokens: 50,
   });
-  console.log(completion.choices[0].message);
-  const rawTitle = completion.choices[0].message?.content?.trim() || '';
 
-  // Remove unnecessary punctuation or quotes
-  const cleanedTitle = rawTitle.replace(/^"|"$/g, ''); // Remove surrounding double quotes if present
-  return cleanedTitle;
+  return text.trim().replace(/^"|"$/g, '');
 }
 
-async function generateImagePrompts(
-  title: string,
-  keyword: string
-): Promise<string[]> {
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Generate concise, descriptive image prompts for Unsplash searches based on article headings. Focus on tech-related, professional imagery.',
-        },
-        {
-          role: 'user',
-          content: `Generate 3, simple, single word image search prompt for upsplash based of the article title: ${title} and keyword: ${keyword}`,
-        },
-      ],
-      temperature: 0.7,
-    });
+export async function generateImagePrompts(title: string, keyword: string): Promise<string[]> {
+  const { text } = await generateText({
+    model: openai('gpt-3.5-turbo'),
+    messages: [
+      {
+        role: 'system',
+        content: 'Generate concise, descriptive image prompts for Unsplash searches based on article headings. Focus on tech-related, professional imagery.',
+      },
+      {
+        role: 'user',
+        content: `Generate 3 simple, single-word image search prompts for Unsplash based on the article title: ${title} and keyword: ${keyword}`,
+      },
+    ],
+  });
 
-    const promptsText = completion.choices[0].message.content || '';
-    console.log('Generated image prompts:', promptsText);
-    return promptsText
-      .split('\n')
-      .filter((prompt) => prompt.trim())
-      .slice(0, 2);
-  } catch (error) {
-    console.error('Error generating image prompts:', error);
-    throw new Error('Failed to generate image prompts');
-  }
+  return text.split('\n').filter((prompt) => prompt.trim()).slice(0, 2);
 }
 
 export async function generateArticleContent(
-  { keyword, userId }: ArticleGenerationInput,
-  prisma: PrismaClient
+  { keyword, userId }: ArticleGenerationInput
 ): Promise<GeneratedContent> {
-  // Fetch user preferences
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      preferredTone: true,
-      targetAudience: true,
-    },
+    select: { preferredTone: true, targetAudience: true },
   });
 
   if (!user) {
@@ -126,7 +83,6 @@ export async function generateArticleContent(
     Target audience: ${user.targetAudience || 'general readers'}
     Article length: 1000 - 1200 words
     Tone: ${user.preferredTone || 'professional'}
-    
     Keyword to optimize for: ${keyword}
     
     Article structure:
@@ -155,69 +111,59 @@ export async function generateArticleContent(
     Format output in clean, renderable HTML.
   `;
 
-  const sectionPrompts: Record<string, string> = {
-    Introduction: `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
-    'Body Section 1': `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
-    'Body Section 2': `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
-    Conclusion: `${basePrompt}\n\nGenerate only the "Conclusion" section. Summarize the key points of the article, provide a thought-provoking question or call to action, and leave the reader with a memorable takeaway. Avoid repeating content from the Introduction or Body Sections.`,
-  };
+  const sectionPrompts = [
+    `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
+    `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
+    `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
+    `${basePrompt}\n\nGenerate only the "Conclusion" section. Summarize the key points of the article, provide a thought-provoking question or call to action, and leave the reader with a memorable takeaway. Avoid repeating content from the Introduction or Body Sections.`,
+  ];
 
-  const generatedSections: string[] = [];
-
-  try {
-    for (const section in sectionPrompts) {
-      const sectionPrompt = sectionPrompts[section];
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+  const generatedSections = await Promise.all(
+    sectionPrompts.map(async (prompt) => {
+      const { text } = await generateText({
+        model: openai('gpt-3.5-turbo'),
         messages: [
           {
             role: 'system',
-            content:
-              'You are an expert tech content writer specializing in SEO-optimized articles.',
+            content: 'You are an expert tech content writer specializing in SEO-optimized articles.',
           },
-          { role: 'user', content: sectionPrompt },
+          { role: 'user', content: prompt },
         ],
-        temperature: 0.6,
-        max_tokens: 1500,
-        top_p: 0.8,
-        frequency_penalty: 0.5,
-        presence_penalty: 0.7,
       });
+      return text;
+    })
+  );
 
-      const sectionContent = completion?.choices?.[0]?.message?.content || '';
-      generatedSections.push(sectionContent);
-    }
+  const fullContent = generatedSections.join('\n');
+  const sanitizedContent = DOMPurify.sanitize(fullContent);
+  const cleanedContent = cleanContent(sanitizedContent);
 
-    const fullContent = generatedSections.join('\n');
-    const sanitizedContent = DOMPurify.sanitize(fullContent);
-    const cleanedContent = cleanContent(sanitizedContent);
+  const imagePrompts = await generateImagePrompts(title, keyword);
 
-    const imagePrompts = await generateImagePrompts(title, keyword);
-
-    return {
-      html: cleanedContent,
-      imagePrompts,
-      title,
-    };
-  } catch (error) {
-    console.error('Error generating article:', error);
-    throw new Error('Failed to generate article content.');
-  }
+  return {
+    html: cleanedContent,
+    imagePrompts,
+    title,
+  };
 }
 
 export async function enhanceArticleWithImages(
-  content: GeneratedContent
+  content: string,
+  imagePrompts: string[]
 ): Promise<string> {
-  if (!content || !content.html || content.imagePrompts.length < 2) {
+  console.log(content,imagePrompts)
+  if (!content || imagePrompts.length < 2) {
     console.error('Insufficient content or image prompts');
     return '';
   }
 
-  let enhancedHtml = content.html;
-
+  let enhancedHtml = content;
   try {
-    // Fetch and use the first prompt for the title image
-    const titleImages = await searchUnsplashImages(content.imagePrompts[0], 1);
+    const [titleImages, middleImages] = await Promise.all([
+      searchUnsplashImages(imagePrompts[0], 1),
+      searchUnsplashImages(imagePrompts[1], 1),
+    ]);
+
     if (titleImages.length > 0) {
       const titleImage = titleImages[0];
       const titleImageHtml = `
@@ -230,11 +176,6 @@ export async function enhanceArticleWithImages(
       enhancedHtml = titleImageHtml + enhancedHtml;
     }
 
-    // Fetch and use the second prompt for the middle image
-    const paragraphs = enhancedHtml.split('</p>');
-    const middleIndex = Math.floor(paragraphs.length / 2);
-    const middleImages = await searchUnsplashImages(content.imagePrompts[1], 1);
-
     if (middleImages.length > 0) {
       const middleImage = middleImages[0];
       const middleImageHtml = `
@@ -245,11 +186,11 @@ export async function enhanceArticleWithImages(
           </figcaption>
         </figure>`;
 
+      const paragraphs = enhancedHtml.split('</p>');
+      const middleIndex = Math.floor(paragraphs.length / 2);
       paragraphs.splice(middleIndex, 0, middleImageHtml);
+      enhancedHtml = paragraphs.join('</p>');
     }
-
-    enhancedHtml = paragraphs.join('</p>');
-    console.log('Enhanced content with images:', enhancedHtml);
 
     return enhancedHtml;
   } catch (error) {
@@ -257,3 +198,4 @@ export async function enhanceArticleWithImages(
     throw new Error('Failed to enhance article with images.');
   }
 }
+

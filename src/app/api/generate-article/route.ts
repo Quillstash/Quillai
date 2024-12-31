@@ -6,7 +6,7 @@ import db from '@/lib/db';
 import { searchUnsplashImages } from '@/utils/upsplash';
 import { generateDescription } from '@/utils/generate-description';
 import { generateSlug } from '@/lib/services';
-import { enhanceArticleWithImages, generateArticleContent } from '@/utils/openai';
+import {  generateArticleContent } from '@/utils/openai';
 
 const articleGenerationSchema = z.object({
   keyword: z.string().min(1, 'Keyword cannot be empty').max(50, 'Keyword is too long'),
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function generateArticleContentAndUpdate(articleId: string, keyword: string) {
+export async function generateArticleContentAndUpdate(articleId: string, keyword: string) {
   try {
     console.log('Starting article generation for article:', articleId);
 
@@ -99,7 +99,7 @@ async function generateArticleContentAndUpdate(articleId: string, keyword: strin
         keyword,
         userId: article.author.id 
       },
-      db
+   
     );
 
     // Generate slug from the AI-generated title
@@ -112,8 +112,8 @@ async function generateArticleContentAndUpdate(articleId: string, keyword: strin
     const metaDescription = await generateDescription(generatedContent.title);
 
     // Enhance article with embedded images
-    const enhancedContent = await enhanceArticleWithImages(generatedContent);
-    console.log('Enhanced content:', enhancedContent);
+    // const enhancedContent = await enhanceArticleWithImages(generatedContent);
+    // console.log('Enhanced content:', enhancedContent);
 
     // Use a transaction to update both the article and user credits atomically
     await db.$transaction(async (tx) => {
@@ -123,7 +123,7 @@ async function generateArticleContentAndUpdate(articleId: string, keyword: strin
         data: {
           title: generatedContent.title,
           slug: slug,
-          content: enhancedContent,
+          // content: enhancedContent,
           metaDescription: metaDescription || '',
           coverImage: coverImages[0]?.url || '',
           generatingState: 'GENERATED',

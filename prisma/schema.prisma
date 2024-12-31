@@ -1,10 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model Article {
+  id              String          @id @default(cuid())
+  metaDescription String?
+  keywords        String[]
+  authorId        String
+  title           String
+  content         String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  generationCost  Float           @default(2)
+  generatingState GeneratingState @default(DRAFT)
+  coverImage      String?
+  slug            String
+  author          User            @relation(fields: [authorId], references: [id])
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String?   @unique
+  emailVerified       DateTime?
+  image               String?
+  credits             Int       @default(5)
+  plan                PLANS     @default(FREE)
+  creditsUsed         Int       @default(0)
+  currentPeriodEnd    DateTime?
+  planId              String?
+  subscriptionId      String?
+  subscriptionStatus  String?
+  onboardingCompleted Boolean   @default(false)
+  preferredTone       String?   @default("professional")
+  targetAudience      String?
+  articles            Article[]
+  payments            Payment[]
+  sessions            Session[]
+  accounts            Account[]
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  isPaid    Boolean  @default(false)
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum PLANS {
@@ -18,81 +93,4 @@ enum GeneratingState {
   GENERATING
   DRAFT
   CANCELLED
-}
-
-model Article {
-  id              String          @id @default(cuid())
-  slug            String
-  metaDescription String?
-  keywords        String[]
-  authorId        String
-  title           String
-  content         String
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  author          User            @relation(fields: [authorId], references: [id])
-  generationCost  Float           @default(2)
-  generatingState GeneratingState @default(DRAFT)
-  coverImage      String?
-}
-
-model User {
-  id                  String    @id @default(cuid())
-  name                String?
-  email               String?   @unique
-  emailVerified       DateTime?
-  image               String?
-  articles            Article[]
-  accounts            Account[]
-  sessions            Session[]
-  payments            Payment[]
-  credits             Int       @default(5)
-  creditsUsed         Int       @default(0)
-  plan                PLANS     @default(FREE)
-  subscriptionId      String?
-  subscriptionStatus  String?
-  planId              String?
-  currentPeriodEnd    DateTime?
-  preferredTone       String?   @default("professional")
-  targetAudience      String?
-  onboardingCompleted Boolean   @default(false)
-}
-
-model Payment {
-  id     String  @id @default(cuid())
-  userId String
-  isPaid Boolean @default(false)
-  amount Float
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User     @relation(fields: [userId], references: [id])
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String  @map("user_id")
-  type              String
-  provider          String
-  providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -167,6 +167,8 @@ export default function ArticleComponent({
                 src={formValues.coverImage}
                 alt={formValues.title}
                 className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                width = {1200}
+                height={400}
               />
             </div>
           )}

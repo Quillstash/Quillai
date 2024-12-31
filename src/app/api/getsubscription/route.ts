@@ -34,9 +34,9 @@ export async function GET() {
 
     const subscriptionData: SubscriptionData = {
       planName: user.plan,
-      currentCredits: user.creditsUsed, // Credits used so far
+      currentCredits: user.creditsUsed, 
       maxCredits: user.credits,
-    };
+    }
 
     return NextResponse.json(subscriptionData)
   } catch (error) {
