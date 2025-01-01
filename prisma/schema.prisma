@@ -33,7 +33,7 @@ model User {
   plan                PLANS     @default(FREE)
   creditsUsed         Int       @default(0)
   currentPeriodEnd    DateTime?
-  planId              String?
+  planId              Int?
   subscriptionId      String?
   subscriptionStatus  String?
   onboardingCompleted Boolean   @default(false)

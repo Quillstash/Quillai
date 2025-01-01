@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// /* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
 import { PLANS } from "@prisma/client";
 import crypto from "crypto";
@@ -139,18 +139,29 @@ async function handleSubscriptionChange(body: any) {
       credits = 150;
       plan = PLANS.PRO;
     }
-  
-    await db.user.update({
+    const updateData: any = {
+      subscriptionId,
+      subscriptionStatus: status,
+      plan,
+      credits
+  };
+
+  // Only add planId if it exists
+  if (planId) {
+      updateData.planId = planId;
+  }
+
+  // Only add renewal date if it exists and is valid
+  const renewsAt = body.data.attributes.renews_at;
+  if (renewsAt && !isNaN(new Date(renewsAt).getTime())) {
+      updateData.currentPeriodEnd = new Date(renewsAt);
+  }
+
+  await db.user.update({
       where: { id: userId },
-      data: {
-        subscriptionId,
-        subscriptionStatus: status,
-        planId,
-        plan,
-        credits,
-        currentPeriodEnd: new Date(body.data.attributes.renews_at),
-      },
-    });
+      data: updateData
+  });
+
 }
 
 async function handleSubscriptionCancelled(body: any) {
