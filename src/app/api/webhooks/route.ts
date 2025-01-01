@@ -1,4 +1,4 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
 import { PLANS } from "@prisma/client";
 import crypto from "crypto";
