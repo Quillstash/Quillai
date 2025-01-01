@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Article } from "@prisma/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const formSchema = z.object({
   keyword: z
@@ -42,6 +43,7 @@ export function ArticleGeneratorModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: session } = useSession();
   const [creditError, setCreditError] = useState<string | null>(null);
+  const { refreshSubscription } = useSubscription()
 
   const {
     register,
@@ -108,6 +110,7 @@ export function ArticleGeneratorModal({
       // For now, we'll pass the full content as the article
       // You might want to parse this content into a proper Article object
       onArticleGenerated(fullContent as unknown as Article);
+      refreshSubscription()
       reset();
     } catch (error) {
       console.error("Failed to generate article:", error);

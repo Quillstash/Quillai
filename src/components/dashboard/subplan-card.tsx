@@ -2,19 +2,11 @@
 
 import { CreditCard } from 'lucide-react'
 import { PricingModal } from '../pricing/pricing-plans'
-import useSWR from 'swr'
 import { Skeleton } from "@/components/ui/skeleton"
-
-const fetcher = async () => {
-  const res = await fetch('/api/getsubscription')
-  if (!res.ok) {
-    throw new Error('Failed to fetch subscription data')
-  }
-  return res.json()
-}
+import { useSubscription } from '@/hooks/useSubscription'
 
 export function SubscriptionPlanCard() {
-  const { data, error, isLoading } = useSWR('/api/getsubscription', fetcher)
+  const { data, error, isLoading } = useSubscription()
 
   if (isLoading) {
     return (

@@ -9,7 +9,6 @@ interface SubscriptionData {
   maxCredits: number;
 }
 
-// GET /api/subscription
 export async function GET() {
   try {
     const session = await auth()
@@ -47,3 +46,4 @@ export async function GET() {
     )
   }
 }
+
