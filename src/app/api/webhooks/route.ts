@@ -27,52 +27,73 @@ async function getRawBody(req: NextRequest): Promise<string> {
   return Buffer.concat(chunks.map(chunk => Buffer.from(chunk))).toString('utf8');
 }
 
+// Helper function to verify webhook source
+function verifyWebhookSignature(signature: string, rawBody: string, secret: string): boolean {
+  const hmac = crypto.createHmac("sha256", secret);
+  const digest = hmac.update(rawBody).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+}
+
 export async function POST(req: NextRequest) {
-  console.log("Webhook received"); // Add logging
+  console.log("Webhook received");
 
   try {
-    // Get raw body for signature verification
-    const rawBody = await getRawBody(req);
-    
-    const eventType = req.headers.get("x-event-name");
-    console.log("Event Type:", eventType); // Add logging
-    
-    // Parse body after getting raw body
-    const body = JSON.parse(rawBody);
-
-    // Check signature
-    const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SIGNATURE;
-    if (!secret) {
+    // Get and verify webhook secret from environment
+    const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SIGNATURE;
+    if (!webhookSecret) {
       console.error("Missing webhook signature secret");
-      return NextResponse.json(
-        { error: "Configuration error" },
-        { status: 500 }
-      );
+      return new NextResponse(JSON.stringify({ error: "Configuration error" }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
 
+    // Get and verify signature from headers
     const signature = req.headers.get("x-signature");
     if (!signature) {
       console.error("Missing signature header");
-      return NextResponse.json(
-        { error: "Missing signature" },
-        { status: 401 }
-      );
+      return new NextResponse(JSON.stringify({ error: "Missing signature" }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
 
-    // Verify signature
-    const hmac = crypto.createHmac("sha256", secret);
-    const digest = hmac.update(rawBody).digest('hex');
+    // Get raw body for signature verification
+    const rawBody = await getRawBody(req);
+    const body = JSON.parse(rawBody);
+    const eventType = req.headers.get("x-event-name");
     
-    if (signature !== digest) {
-      console.error("Invalid signature");
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: 401 }
-      );
-    }
-
+    console.log("Event Type:", eventType);
     console.log('Event body:', body);
 
+    // Verify the webhook signature
+    if (!verifyWebhookSignature(signature, rawBody, webhookSecret)) {
+      console.error("Invalid signature");
+      return new NextResponse(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // Get the user ID from the webhook payload
+    const userId = body.meta.custom_data?.user_id;
+    if (!userId) {
+      console.error("Missing user ID in webhook payload");
+      return new NextResponse(JSON.stringify({ error: "Missing user ID" }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // Process the webhook based on event type
     switch (eventType) {
       case "subscription_created":
       case "subscription_updated":
@@ -94,7 +115,6 @@ export async function POST(req: NextRequest) {
         console.log(`Unhandled event type: ${eventType}`);
     }
 
-    // Return 200 status with content-type header
     return new NextResponse(JSON.stringify({ message: "Webhook processed successfully" }), {
       status: 200,
       headers: {
@@ -112,6 +132,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
 // Add GET handler to properly handle 405
 export async function GET() {
   return new NextResponse(JSON.stringify({ error: "Method not allowed" }), {
@@ -122,46 +143,47 @@ export async function GET() {
   });
 }
 
-// Your existing handler functions remain the same
 async function handleSubscriptionChange(body: any) {
-    const userId = body.meta.custom_data.user_id;
-    const subscriptionId = body.data.id;
-    const status = body.data.attributes.status;
-    const planId = body.data.attributes.product_id;
+  const userId = body.meta.custom_data.user_id;
+  const subscriptionId = body.data.id;
+  const status = body.data.attributes.status;
+  const planId = body.data.attributes.variant_id;
+
+  let credits = 5;
+  let plan: PLANS = PLANS.FREE;
+
+  if (planId === 638793 || planId === 638802) {
+    credits = 50;
+    plan = PLANS.BASIC;
+  } else if (planId === 638800 || planId === 638803) {
+    credits = 150;
+    plan = PLANS.PRO;
+  }
   
-    let credits = 5;
-    let plan: PLANS = PLANS.FREE;
-  
-    if (planId === '638793' || planId === '638802') {
-      credits = 50;
-      plan = PLANS.BASIC;
-    } else if (planId === '638800' || planId === '638803') {
-      credits = 150;
-      plan = PLANS.PRO;
-    }
-    const updateData: any = {
-      subscriptionId,
-      subscriptionStatus: status,
-      plan,
-      credits
+  const updateData: any = {
+    subscriptionId,
+    subscriptionStatus: status,
+    plan,
+    credits
   };
 
   // Only add planId if it exists
   if (planId) {
-      updateData.planId = planId;
+    updateData.planId = planId;
   }
-
+  
+  console.log(credits, planId);
+  
   // Only add renewal date if it exists and is valid
   const renewsAt = body.data.attributes.renews_at;
   if (renewsAt && !isNaN(new Date(renewsAt).getTime())) {
-      updateData.currentPeriodEnd = new Date(renewsAt);
+    updateData.currentPeriodEnd = new Date(renewsAt);
   }
 
   await db.user.update({
-      where: { id: userId },
-      data: updateData
+    where: { id: userId },
+    data: updateData
   });
-
 }
 
 async function handleSubscriptionCancelled(body: any) {

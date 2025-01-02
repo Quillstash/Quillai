@@ -1,88 +1,223 @@
 "use client"
 
 import * as React from "react"
-import { Check } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Container } from "./pricingContainer"
+import { toast } from "sonner"
+import Link from "next/link"
 
-const plans = [
+interface PricingPlan {
+  monthlyId: string
+  yearlyId: string
+  name: string
+  monthlyPrice: number
+  yearlyPrice: number
+  originalYearlyPrice: number
+  features: string[]
+  articles: number
+  extraArticlePrice: number
+  linkedPages: number
+  regenerations: number
+  support: string
+}
+
+const plans: PricingPlan[] = [
   {
+    monthlyId: '638793',
+    yearlyId: '638802',
     name: "Basic Plan",
     monthlyPrice: 25,
-    yearlyPrice: 20,
-    description: "Perfect for individuals and small teams",
-    features: ["Up to 5 users", "Basic analytics", "24/7 support"],
+    yearlyPrice: 240,
+    originalYearlyPrice: 300,
+    articles: 25,
+    extraArticlePrice: 1.5,
+    linkedPages: 250,
+    regenerations: 1,
+    support: "24/7 Live discord support",
+    features: [
+      "25 Articles per month",
+      "$1.5 per extra article",
+      "1 free regeneration per article",
+      "24/7 Live discord support"
+    ]
   },
   {
+    monthlyId: '638800',
+    yearlyId: '638803',
     name: "Pro Plan",
     monthlyPrice: 45,
-    yearlyPrice: 30,
-    description: "Ideal for growing businesses",
-    features: ["Up to 20 users", "Advanced analytics", "Priority support", "Custom integrations"],
-  },
-  {
-    name: "Enterprise",
-    monthlyPrice: 70,
-    yearlyPrice: 60,
-    description: "For large-scale operations",
-    features: ["Unlimited users", "Enterprise-grade analytics", "Dedicated account manager", "24/7 phone support", "Custom solutions"],
-  },
+    yearlyPrice: 360,
+    originalYearlyPrice: 450,
+    articles: 75,
+    extraArticlePrice: 1,
+    linkedPages: 1000,
+    regenerations: 1,
+    support: "24/7 Live discord support",
+    features: [
+      "75 Articles per month",
+      "$1 per extra article",
+      "1 free regenerations per article",
+      "24/7 Live discord support"
+    ]
+  }
 ]
 
 export function PricingCards() {
   const [isYearly, setIsYearly] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleSubscribe = async (plan: PricingPlan) => {
+    setIsLoading(true)
+    try {
+      const planId = isYearly ? plan.yearlyId : plan.monthlyId;
+      const response = await fetch('/api/subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate subscription')
+      }
+
+      const { checkoutUrl } = await response.json()
+      window.open(checkoutUrl, '_blank');
+    } catch (error) {
+      console.error('Subscription error:', error)
+      toast.error("Failed to initiate subscription. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <Container className="py-10">
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center space-x-2 bg-muted p-1 rounded-full">
+      <div className="flex justify-end mb-8">
+        <div className="flex items-center gap-4 border rounded-lg p-1">
           <button
-            className={`px-4 py-2 rounded-full ${
-              !isYearly ? "bg-primary text-primary-foreground" : ""
+            onClick={() => setIsYearly(true)}
+            className={`px-3 py-1.5 rounded-md transition-colors ${
+              isYearly
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground"
             }`}
+          >
+            Yearly
+            <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
+              Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
+            </span>
+          </button>
+          <button
             onClick={() => setIsYearly(false)}
+            className={`px-3 py-1.5 rounded-md transition-colors ${
+              !isYearly
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground"
+            }`}
           >
             Monthly
           </button>
-          <button
-            className={`px-4 py-2 rounded-full ${
-              isYearly ? "bg-primary text-primary-foreground" : ""
-            }`}
-            onClick={() => setIsYearly(true)}
-          >
-            Yearly
-          </button>
         </div>
       </div>
-      <div className="grid gap-8 md:grid-cols-3">
+      <div className="grid md:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <Card key={plan.name} className="flex flex-col">
+          <Card key={plan.name} className="flex flex-col hover:border-primary transition-colors relative">
+            {plan.name === "Pro Plan" && (
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
+                Most Popular
+              </div>
+            )}
             <CardHeader>
               <CardTitle>{plan.name}</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Billed {isYearly ? "yearly" : "monthly"}
+              </p>
             </CardHeader>
             <CardContent className="flex-grow">
-              <div className="text-3xl font-bold">
-                ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /{isYearly ? "year" : "month"}
-                </span>
+              <div className="space-y-2">
+                <h4 className="text-4xl font-bold">
+                  ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                </h4>
+                {isYearly && (
+                  <p className="text-sm text-muted-foreground">
+                    <span className="line-through">${plan.originalYearlyPrice}</span>
+                    <span className="ml-2 text-green-600">
+                      {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
+                    </span>
+                  </p>
+                )}
               </div>
-              <p className="mt-4 text-muted-foreground">{plan.description}</p>
               <ul className="mt-4 space-y-2">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    {feature}
+                  <li key={feature} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Choose Plan</Button>
+              <Button 
+                className="w-full" 
+                onClick={() => handleSubscribe(plan)}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </>
+                ) : (
+                  "Select plan"
+                )}
+              </Button>
             </CardFooter>
           </Card>
         ))}
+        <Card className="flex flex-col bg-muted/50">
+          <CardHeader>
+            <CardTitle>Enterprise Plan</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Custom pricing
+            </p>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <div className="space-y-2">
+              <h4 className="text-4xl font-bold">Coming Soon</h4>
+            </div>
+            <ul className="mt-4 space-y-2">
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm">Custom article limit</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm">Unlimited linked pages</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm">Strategic support</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" disabled>Contact Sales</Button>
+          </CardFooter>
+        </Card>
+      </div>
+      <div className="flex justify-start gap-4 mt-4">
+        <Button variant="ghost" size="sm">
+          Chat to us
+        </Button>
+        <Button variant="ghost" size="sm">
+          <Link href="/pricing">
+            View full pricing
+          </Link>
+        </Button>
       </div>
     </Container>
   )

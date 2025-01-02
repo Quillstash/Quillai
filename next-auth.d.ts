@@ -1,10 +1,11 @@
 import { DefaultSession } from "next-auth";
 
 declare module 'next-auth' {
-  interface Session {
+ export interface Session {
     user: {
       /** The user's onboarding status. */
       onboardingCompleted: boolean;
+      id: string;
     } & DefaultSession['user'];
   }
 }

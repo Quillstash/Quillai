@@ -24,6 +24,7 @@
     "@radix-ui/react-collapsible": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
+    "@radix-ui/react-navigation-menu": "^1.2.3",
     "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-select": "^2.1.4",
     "@radix-ui/react-separator": "^1.1.1",
@@ -46,6 +47,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "edgestore": "^1.0.3",
+    "framer-motion": "^11.15.0",
     "hercai": "^12.4.0",
     "isomorphic-dompurify": "^2.19.0",
     "lowlight": "^3.3.0",
@@ -64,6 +66,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "typewriter-effect": "^2.21.0",
     "unsplash-js": "^7.0.19",
     "zod": "^3.24.1"
   },

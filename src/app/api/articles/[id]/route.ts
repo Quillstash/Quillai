@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { z } from 'zod';
 import db from '@/lib/db';
+import { Session } from 'next-auth';
 
 const articleUpdateSchema = z.object({
   title: z
@@ -15,35 +16,45 @@ const articleUpdateSchema = z.object({
   metaDescription: z.string().nullable(),
 });
 
-async function validateRequest() {
+async function validateRequest(): Promise<Session['user'] | null> {
   const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return session.user;
+  return session?.user || null;
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const id = (await params).id;
-
   try {
+    const { id } = await context.params;
+
     const user = await validateRequest();
-    if (!user) return;
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
     const deletedArticle = await db.article.delete({
-      where: { id: id, authorId: id },
+      where: { 
+        id: id,
+        authorId: user.id 
+      },
     });
 
     if (!deletedArticle) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Article not found' },
+        { status: 404 }
+      );
     }
-
     return NextResponse.json({ success: true, article: deletedArticle });
   } catch (error) {
     console.error('Delete article error:', error);
+    
+  
+
     return NextResponse.json(
       { error: 'Failed to delete article' },
       { status: 500 }

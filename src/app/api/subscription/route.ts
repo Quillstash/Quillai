@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 const subscriptionPlans = [
   { id: '638793', name: "Basic Plan", price: 25, interval: 'monthly' },
   { id: '638800', name: "Pro Plan", price: 45, interval: 'monthly' },
-  { id: '638802', name: "Basic Plan", price: 240, interval: 'annual' },
-  { id: '638803', name: "Pro Plan", price: 360, interval: 'annual' },
+  { id: '638802', name: "Basic Plan Annually", price: 240, interval: 'annual' },
+  { id: '638803', name: "Pro Plan Annually", price: 360, interval: 'annual' },
 ];
 
 export async function GET() {
@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
           checkout_data: {
             custom: {
               user_id: session.user.id,
+              plan_name: plan.name,
+              plan_Id: plan.id
             },
             email: session.user.email
           },

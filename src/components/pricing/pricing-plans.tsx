@@ -20,6 +20,7 @@ interface PricingPlan {
   name: string
   monthlyPrice: number
   yearlyPrice: number
+  originalYearlyPrice: number
   features: string[]
   articles: number
   extraArticlePrice: number
@@ -35,17 +36,17 @@ const plans: PricingPlan[] = [
     name: "Basic Plan",
     monthlyPrice: 25,
     yearlyPrice: 240,
+    originalYearlyPrice: 300,
     articles: 10,
     extraArticlePrice: 8.5,
     linkedPages: 250,
     regenerations: 1,
     support: "Live chat support",
     features: [
-      "10 Articles per month",
-      "$8.5 per extra article",
-      "250 linked website pages",
+      "25 Articles per month",
+      "$1.5 per extra article",
       "1 free regeneration per article",
-      "Live chat support"
+      "24/7 Live discord support"
     ]
   },
   {
@@ -54,17 +55,17 @@ const plans: PricingPlan[] = [
     name: "Pro Plan",
     monthlyPrice: 45,
     yearlyPrice: 360,
+    originalYearlyPrice: 450,
     articles: 40,
     extraArticlePrice: 7,
     linkedPages: 1000,
     regenerations: 1,
     support: "Live chat support",
     features: [
-      "40 Articles per month",
-      "$7 per extra article",
-      "1000 linked website pages",
+      "75 Articles per month",
+      "$1 per extra article",
       "1 free regenerations per article",
-      "Live chat support"
+      "24/7 Live discord support"
     ]
   }
 ]
@@ -119,11 +120,9 @@ export function PricingModal() {
               }`}
             >
               Yearly
-              {isYearly && (
-                <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
-                  Save 20%
-                </span>
-              )}
+              <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
+                Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
+              </span>
             </button>
             <button
               onClick={() => setIsYearly(false)}
@@ -141,8 +140,13 @@ export function PricingModal() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors"
+              className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors relative"
             >
+              {plan.name === "Pro Plan" && (
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
+                  Most Popular
+                </div>
+              )}
               <div>
                 <h3 className="font-semibold text-xl">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground">
@@ -153,6 +157,14 @@ export function PricingModal() {
                 <h4 className="text-4xl font-bold">
                   ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                 </h4>
+                {isYearly && (
+                  <p className="text-sm text-muted-foreground">
+                    <span className="line-through">${plan.originalYearlyPrice}</span>
+                    <span className="ml-2 text-green-600">
+                      {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
+                    </span>
+                  </p>
+                )}
               </div>
               <ul className="space-y-2">
                 {plan.features.map((feature) => (
