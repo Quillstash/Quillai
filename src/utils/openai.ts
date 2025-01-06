@@ -169,7 +169,7 @@ export async function enhanceArticleWithImages(
       const titleImageHtml = `
         <figure class="my-8">
           <img src="${titleImage.url}" alt="${titleImage.alt}" class="rounded-lg shadow-md w-full" />
-          <figcaption class="text-sm text-gray-500 mt-2">
+          <figcaption class="text-sm text-gray-500 mt-2 mx-auto">
             Photo by <a href="${titleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${titleImage.credit.name}</a> on Unsplash
           </figcaption>
         </figure>`;
@@ -181,7 +181,7 @@ export async function enhanceArticleWithImages(
       const middleImageHtml = `
         <figure class="my-8">
           <img src="${middleImage.url}" alt="${middleImage.alt}" class="rounded-lg shadow-md w-full" />
-          <figcaption class="text-sm text-gray-500 mt-2">
+          <figcaption class="text-sm text-gray-500 mt-2 mx-auto">
             Photo by <a href="${middleImage.credit.link}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">${middleImage.credit.name}</a> on Unsplash
           </figcaption>
         </figure>`;
@@ -198,4 +198,7 @@ export async function enhanceArticleWithImages(
     throw new Error('Failed to enhance article with images.');
   }
 }
+
+
+
 

@@ -19,6 +19,9 @@ model Article {
   generationCost  Float           @default(2)
   generatingState GeneratingState @default(DRAFT)
   coverImage      String?
+  wordCount       Int?
+  articleRating   String?
+  RatingComment   String?
   slug            String
   author          User            @relation(fields: [authorId], references: [id])
 }

@@ -1,5 +1,5 @@
 // app/api/chat/route.ts
-import { streamText } from "ai";
+import { streamText, StreamTextResult } from "ai";
 import db from "@/lib/db";
 import { generateSlug } from "@/lib/services";
 
@@ -11,6 +11,8 @@ import {
   generateImagePrompts,
   generateTitle,
 } from "@/utils/openai";
+import { analyzeArticle } from "@/utils/article-eval";
+import { generateSectionPrompts } from "@/utils/ai-prompts";
 
 export const maxDuration = 30;
 
@@ -49,67 +51,15 @@ export async function POST(req: Request) {
     },
   });
   console.log(article)
-  // const basePrompt = `
-  //   Generate a high-quality, SEO-optimized, and human-like article using the following guidelines:
+  const basePrompt = `
+    Generate a high-quality, SEO-optimized, and human-like article using the following guidelines:
 
-  //   Topic: ${title}
-  //   Target audience: ${user.targetAudience || 'general readers'}
-  //   Article length: 1000 - 1200 words
-  //   Tone: ${user.preferredTone || 'professional'}
-  //   Keyword to optimize for: ${keyword}
-
-  //   Article structure:
-  //   - Engaging introduction with a hook
-  //   - Clear and informative headings and subheadings (use H2, H3, H4, bold tags appropriately)
-  //   - Short, easy-to-read paragraphs (3-4 sentences each)
-  //   - Bullet points or numbered lists where appropriate
-  //   - Include quotes from notable sites or people
-  //   - Conclusion with a thought-provoking question
-
-  //   SEO optimization:
-  //   - Include keyword in the first paragraph and headings
-  //   - Use keyword variations naturally throughout
-  //   - Include internal and external link placeholders
-  //   - Offer a unique perspective or angle on the topic
-  //   - Include up-to-date information and recent developments
-  //   - Use transitional phrases between paragraphs
-
-  //   Content guidelines:
-  //   - Write in a ${user.preferredTone || 'professional'} tone
-  //   - Use active voice and present tense
-  //   - Include current statistics and studies
-  //   - Provide actionable insights
-  //   - Address reader questions proactively
-
-  //   Format output in clean, renderable HTML.
-  // `;
-
-  // const sectionPrompts = [
-  //   `${basePrompt}\n\nGenerate only the "Introduction" section. Create an engaging hook to draw the reader in, provide a brief overview of the topic "${title}", and highlight the article's value to the reader. Avoid detailed explanations or content that overlaps with body sections.`,
-  //   `${basePrompt}\n\nGenerate only the "Body Section 1". Focus on the first major aspect of the topic "${title}". Provide clear explanations, relevant examples, and actionable insights. Ensure this section introduces fresh content without overlapping with the Introduction or other sections.`,
-  //   `${basePrompt}\n\nGenerate only the "Body Section 2". Explore a new angle or subtopic related to "${title}" that complements but doesn't repeat Body Section 1. Include data, practical applications, or insights, and maintain a logical flow from the first body section.`,
-  //   `${basePrompt}\n\nGenerate only the "Conclusion" section. Summarize the key points of the article, provide a thought-provoking question or call to action, and leave the reader with a memorable takeaway. Avoid repeating content from the Introduction or Body Sections.`,
-  // ];
-
-  const result = streamText({
-    model: openai("gpt-3.5-turbo"),
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an expert tech content writer specializing in SEO-optimized articles.",
-      },
-      {
-        role: "user",
-        content: `
-        Generate a high-quality, SEO-optimized, and human-like article using the following guidelines:
-    
     Topic: ${title}
-    Target audience: ${user.targetAudience || "general readers"}
+    Target audience: ${user.targetAudience || 'general readers'}
     Article length: 1000 - 1200 words
-    Tone: ${user.preferredTone || "professional"}
+    Tone: ${user.preferredTone || 'professional'}
     Keyword to optimize for: ${keyword}
-    
+
     Article structure:
     - Engaging introduction with a hook
     - Clear and informative headings and subheadings (use H2, H3, H4, bold tags appropriately)
@@ -117,7 +67,7 @@ export async function POST(req: Request) {
     - Bullet points or numbered lists where appropriate
     - Include quotes from notable sites or people
     - Conclusion with a thought-provoking question
-    
+
     SEO optimization:
     - Include keyword in the first paragraph and headings
     - Use keyword variations naturally throughout
@@ -125,121 +75,159 @@ export async function POST(req: Request) {
     - Offer a unique perspective or angle on the topic
     - Include up-to-date information and recent developments
     - Use transitional phrases between paragraphs
-    
+
     Content guidelines:
-    - Write in a ${user.preferredTone || "professional"} tone
+    - Write in a ${user.preferredTone || 'professional'} tone
     - Use active voice and present tense
     - Include current statistics and studies
     - Provide actionable insights
     - Address reader questions proactively
-    
-    Format output in clean, renderable HTML.
-        `,
-      },
-    ],
-    onFinish: async ({ response }) => {
-      try {
-        const messages = Array.isArray(response.messages)
-          ? response.messages
-          : [];
 
-        const contentArray = messages
-          .filter((msg) => msg.role === "assistant")
-          .map((msg) => {
-            try {
-              // Parse the JSON content if it's a string
-              const parsed =
-                typeof msg.content === "string"
-                  ? JSON.parse(msg.content)
-                  : msg.content;
+ Formatting requirements:
+    - Do not include section labels like "Body Section 1" or "Introduction" but ensure the content is structured accordingly
+    - Remove any markdown code block indicators 
+    - Ensure proper nesting of HTML tags 
+    - Use semantic HTML for structure
+    - Include appropriate spacing between sections and paragraphs
+    - include more bold, italic, uderline, mark and other text formatting tags to emphasize key points
 
-              // Extract the text content from the parsed object
-              if (Array.isArray(parsed)) {
-                return parsed
-                  .filter((item) => item.type === "text")
-                  .map((item) => {
-                    // Remove the HTML code block markers if present
-                    return item.text
-                      .replace(/```html\n/, "")
-                      .replace(/\n```/, "");
-                  })
-                  .join("\n");
-              }
-              return typeof parsed === "string"
-                ? parsed
-                : JSON.stringify(parsed);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (e) {
-              // If parsing fails, return the original content
-              return typeof msg.content === "string"
-                ? msg.content
-                : JSON.stringify(msg.content);
+    Return the content as clean HTML without any markdown or section markers.
+  `;
+
+  const sectionPrompts = generateSectionPrompts(basePrompt, title, keyword);
+
+  let articleSections: string[] = [];
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const streamResults: StreamTextResult<any>[] = await Promise.all(
+      sectionPrompts.map((prompt, index) =>
+        streamText({
+          model: openai("gpt-3.5-turbo"),
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert tech content writer specializing in SEO-optimized articles.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          onChunk: ({ chunk }) => {
+            if (chunk.type === 'text-delta') {
+              process.stdout.write(`Section ${index + 1}: ${chunk.textDelta}`);
             }
-          });
+          },
+        })
+      )
+    );
 
-        const completeResponse = contentArray.join("\n\n");
-        console.log("Complete article content:", completeResponse);
-
-        // Generate image prompts
-        const imagePrompts = await generateImagePrompts(title, keyword);
-        console.log("Generated image prompts:", imagePrompts);
-
-        // Get cover image
-        const coverImages = await searchUnsplashImages(keyword, 1);
-
-        // Generate meta description
-        const metaDescription = await generateDescription(title);
-
-        // Enhance article with embedded images
-        const enhancedContent = await enhanceArticleWithImages(
-          completeResponse,
-          imagePrompts
-        );
-
-        await db.$transaction(async (tx) => {
-          // Update the article
-          await tx.article.update({
-            where: { id: article.id },
-            data: {
-              content: enhancedContent,
-              metaDescription,
-              coverImage: coverImages[0]?.url || "",
-              generatingState: "GENERATED",
-            },
-          });
-  
-          // Deduct credits and update creditsUsed for the user
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              creditsUsed: { increment: 2 },
-            },
-          });
-        });
-  
-      } catch (error) {
-        console.error("Failed to process completed article:", error);
-  
-        // Update article status to error within a transaction
-        await db.$transaction(async (tx) => {
-          await tx.article.update({
-            where: { id: article.id },
-            data: {
-              generatingState: "CANCELLED",
-            },
-          });
-  
-          // Refund the credits if an error occurred
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              creditsUsed: { decrement: 2 },
-            },
-          });
-        });
+    for (const result of streamResults) {
+      let sectionContent = '';
+      for await (const chunk of result.textStream) {
+        sectionContent += chunk;
       }
-    },
-  });
+      articleSections.push(sectionContent);
+    }
 
-  return result.toDataStreamResponse();
+    // Process the generated content
+    articleSections = articleSections.map((section) => {
+      try {
+        const cleaned = section
+          .replace(/```\s*html\n?/g, '')
+          .replace(/```/g, '')
+          .replace(/Body Section \d+:/g, '')
+          .replace(/Introduction:/g, '')
+          .replace(/Conclusion:/g, '')
+          .trim();
+        
+        return cleaned;
+      } catch {
+        return section;
+      }
+    });
+
+    const completeResponse = articleSections.join("\n\n");
+    console.log("Complete article content:", completeResponse);
+
+    // Generate image prompts
+    const imagePrompts = await generateImagePrompts(title, keyword);
+    console.log("Generated image prompts:", imagePrompts);
+
+    // Get cover image
+    const coverImages = await searchUnsplashImages(keyword, 1);
+
+    // Analyze the article
+    const analysis = await analyzeArticle(completeResponse);
+
+    // Generate meta description
+    const metaDescription = await generateDescription(title);
+
+    // Enhance article with embedded images
+    const enhancedContent = await enhanceArticleWithImages(
+      completeResponse,
+      imagePrompts
+    );
+
+    await db.$transaction(async (tx) => {
+      // Update the article
+      await tx.article.update({
+        where: { id: article.id },
+        data: {
+          content: enhancedContent,
+          metaDescription,
+          coverImage: coverImages[0]?.url || "",
+          generatingState: "GENERATED",
+          wordCount: analysis?.wordCount || 0,
+          articleRating: `SEO: ${analysis?.seo.rating || 'N/A'}, Structure: ${analysis?.structure.rating || 'N/A'}, Tone: ${analysis?.tone.rating || 'N/A'}`,
+          RatingComment: `SEO: ${analysis?.seo.comment || 'N/A'}\nStructure: ${analysis?.structure.comment || 'N/A'}\nTone: ${analysis?.tone.comment || 'N/A'}`,
+        },
+      });
+
+      // Deduct credits and update creditsUsed for the user
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          creditsUsed: { increment: 2 },
+        },
+      });
+    });
+    return new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(JSON.stringify({ success: true, article: enhancedContent }));
+          controller.close();
+        }
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+  } catch (error) {
+    console.error("Failed to process completed article:", error);
+
+    // Update article status to error within a transaction
+    await db.$transaction(async (tx) => {
+      await tx.article.update({
+        where: { id: article.id },
+        data: {
+          generatingState: "CANCELLED",
+        },
+      });
+
+      // Refund the credits if an error occurred
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          creditsUsed: { decrement: 2 },
+        },
+      });
+    });
+  
+
+    return { success: false, message: "Failed to generate article" };
+  }
 }

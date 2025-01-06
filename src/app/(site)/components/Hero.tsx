@@ -1,10 +1,40 @@
-"use client"
-import { motion } from "framer-motion";
+"use client";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Typewriter from "typewriter-effect";
+import { useRef, useEffect, useState } from "react";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const BackgroundShape = ({ initialX, initialY }:any) => {
+  const { scrollYProgress } = useScroll();
+  const x = useTransform(scrollYProgress, [0, 1], [initialX, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [initialY, 0]);
+
+  return (
+    <motion.div
+      className="absolute w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 opacity-20"
+      style={{ x, y }}
+    />
+  );
+};
 
 export const Hero = () => {
+  const [shapes, setShapes] = useState<{ id: number; x: number; y: number }[]>([]);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const newShapes = Array.from({ length: 10 }, (_, i) => ({
+      id: i,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+    }));
+    setShapes(newShapes);
+  }, []);
+
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center hero-gradient px-4 relative overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="min-h-screen flex flex-col items-center justify-center hero-gradient px-4 relative overflow-hidden"
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -17,11 +47,7 @@ export const Hero = () => {
         <div className="text-xl md:text-2xl text-gray-600 mb-8 h-12">
           <Typewriter
             options={{
-              strings: [
-                "Write Smarter...",
-                "Rank Faster...",
-                "Save Time...",
-              ],
+              strings: ["Write Smarter...", "Rank Faster...", "Save Time..."],
               autoStart: true,
               loop: true,
             }}
@@ -30,7 +56,23 @@ export const Hero = () => {
         <p className="text-xl text-gray-600 mb-8">
           Your all-in-one AI article generator for SEO success.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Onboarding Video Section */}
+          <div className="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* <h2 className="text-2xl font-semibold text-gray-800 p-4">
+            Watch Our Onboarding Video
+          </h2> */}
+          <div className="aspect-w-16 aspect-h-9">
+            <video
+              src="/video/onboarding.mp4"
+              
+              autoPlay
+              muted
+              loop
+              className="w-full h-full"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center my-12">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -46,9 +88,20 @@ export const Hero = () => {
             How It Works
           </motion.button>
         </div>
+
+      
       </motion.div>
+
+      {/* Background Shapes */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10" />
+        {shapes.map((shape) => (
+          <BackgroundShape
+            key={shape.id}
+            initialX={shape.x}
+            initialY={shape.y}
+          />
+        ))}
       </div>
     </section>
   );

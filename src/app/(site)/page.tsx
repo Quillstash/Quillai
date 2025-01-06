@@ -1,28 +1,28 @@
 'use client';
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { FAQ } from "./components/FAQ";
 import { Features } from "./components/Features";
 import { Hero } from "./components/Hero";
 import { Testimonials } from "./components/Testimonials";
-import { useEffect } from "react";
-import { getSession } from "next-auth/react";
+// import { useEffect } from "react";
+// import { getSession } from "next-auth/react";
 
 function Page() {
 
-    const router = useRouter();
+  //   const router = useRouter();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      // Replace with your session-checking logic
-      const session = await getSession(); // Example session-checking function
-      if (session) {
-        router.replace('/articles'); // Redirect to /articles if session exists
-      }
-    };
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     // Replace with your session-checking logic
+  //     const session = await getSession(); // Example session-checking function
+  //     if (session) {
+  //       router.replace('/articles'); // Redirect to /articles if session exists
+  //     }
+  //   };
 
-    checkSession();
-  }, [router]);
+  //   checkSession();
+  // }, [router]);
 
 
   return (

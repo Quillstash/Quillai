@@ -23,7 +23,7 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              {item.title === "Help & Support" ? (
+              {item.title === "Help & Feedback" ? (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <SidebarMenuButton size="lg">

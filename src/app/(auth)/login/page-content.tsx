@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, Google } from '@/components/icons';
+import {  Google } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { signIn } from 'next-auth/react';
@@ -46,7 +46,7 @@ export function PageContent() {
         )}
         Google
       </Button>
-      <Button
+      {/* <Button
         type='button'
         variant='outline'
         onClick={() => handleSignIn('github')}
@@ -58,7 +58,7 @@ export function PageContent() {
           <Github className='mr-2 h-4 w-4' />
         )}
         GitHub
-      </Button>
+      </Button> */}
     </div>
   );
 }

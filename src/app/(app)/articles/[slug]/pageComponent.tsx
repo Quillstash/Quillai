@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 // import KeywordInput from "@/components/keyword/KeywordInput";
 import Image from "next/image";
+import ArticleAnalysisCard from "@/components/article/analysis-card";
 
 interface ArticleComponentProps {
   article: Article;
@@ -26,6 +27,9 @@ interface ArticleValues {
   coverImage: string | null;
   keywords: string[];
   metaDescription: string | null;
+  wordCount: number | null;
+  articleRating: string | null;
+  ratingComment: string | null;
 }
 
 export default function ArticleComponent({
@@ -43,6 +47,9 @@ export default function ArticleComponent({
       coverImage: initialArticle.coverImage,
       keywords: initialArticle.keywords,
       metaDescription: initialArticle.metaDescription,
+      wordCount: initialArticle.wordCount,
+      articleRating: initialArticle.articleRating,
+      ratingComment: initialArticle.RatingComment,
     },
   });
 
@@ -89,7 +96,7 @@ export default function ArticleComponent({
       const result = await response.json();
       if (result.success) {
         toast.success("Article deleted successfully");
-        router.push("/ai-articles");
+        router.push("/articles");
       } else {
         throw new Error(result.error || "Failed to delete article");
       }
@@ -245,6 +252,12 @@ export default function ArticleComponent({
             />
           )}
         </Card>
+        {/* Article Analysis Section */}
+        <ArticleAnalysisCard
+          wordCount={formValues.wordCount || 0}
+          articleRating={formValues.articleRating || ''}
+          ratingComment={formValues.ratingComment || ''}
+        />
 
         {/* Meta Description Section */}
         <Card className="p-6">

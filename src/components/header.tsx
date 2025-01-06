@@ -1,22 +1,21 @@
 "use client"
-import React, { useEffect } from 'react';
+import React from 'react';
 import Container from '@/components/container';
 import Link from 'next/link';
 import { Button, buttonVariants } from './ui/button';
 import { ArrowRight, Feather } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 
  function Header() {
-  // const user = await getSession();
-  const user = null;
-  const router = useRouter();
+  const { data: user } = useSession();
+  // const router = useRouter();
 
   // Redirect if user has active session
- useEffect(() => {
-    if (user) {
-      router.push('/articles');
-    }
-  }, [user, router]);
+//  useEffect(() => {
+//     if (user) {
+//       router.push('/articles');
+//     }
+//   }, [user, router]);
 
   return (
     <nav className='sticky z-[100] h-16 inset-x-0 top-0 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all'>
@@ -38,6 +37,7 @@ import { useRouter } from 'next/navigation';
                 <Button 
                   variant="ghost" 
                   className='hover:bg-purple-50'
+                  onClick={() => signOut()}
                 >
                   Logout
                 </Button>

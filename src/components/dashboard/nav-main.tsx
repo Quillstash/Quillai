@@ -35,10 +35,10 @@ export function NavMain({
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem className="py-2 ">
-              <SidebarMenuButton asChild tooltip={item.title} className="p-2">
-                <a href={item.url}>
-                  <item.icon className="text-blue-500"/>
+            <SidebarMenuItem className=" ">
+              <SidebarMenuButton asChild tooltip={item.title} className="p-2 border border-transparent hover:border-border">
+                <a href={item.url} className="text-muted-foreground hover:text-foreground">
+                  <item.icon />
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>

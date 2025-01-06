@@ -2,7 +2,7 @@ import {
     SearchIcon,       // For keyword research or search functionality
     UsersIcon,        // For team collaboration
     HelpCircleIcon,   // For help and support
-    MessageSquareIcon,// For feedback
+    // MessageSquareIcon,// For feedback
    
     Pen,     // For article management
     UserCog2Icon,
@@ -77,15 +77,15 @@ import {
    
     navSecondary: [
       {
-        title: "Help & Support",
+        title: "Help & Feedback",
         url: "", // Support section link
         icon: HelpCircleIcon, // Support icon
       },
-      {
-        title: "Feedback",
-        url: "/feedback", // Link to submit user feedback
-        icon: MessageSquareIcon, // Feedback icon
-      },
+      // {
+      //   title: "Feedback",
+      //   url: "/feedback", // Link to submit user feedback
+      //   icon: MessageSquareIcon, // Feedback icon
+      // },
     ],
   };
   
