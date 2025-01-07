@@ -24,11 +24,14 @@ export function KeywordSearchContainer() {
   const [keyword, setKeyword] = useState('')
   const [results, setResults] = useState<KeywordResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (keyword.trim()) {
       setIsLoading(true)
+      setError(null)
+
       try {
         const response = await fetch('/api/search-keywords', {
           method: 'POST',
@@ -37,16 +40,18 @@ export function KeywordSearchContainer() {
           },
           body: JSON.stringify({ keyword: keyword.trim() }),
         })
-
+        console.log(response)
         if (!response.ok) {
-          throw new Error('Failed to fetch keywords')
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Failed to fetch keywords')
         }
 
         const keywordResults = await response.json()
         setResults(keywordResults)
-      } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error:any) {
         console.error('Error searching keywords:', error)
-        // Handle error (e.g., show error message to user)
+        setError(error.message, )
       } finally {
         setIsLoading(false)
       }
@@ -80,6 +85,11 @@ export function KeywordSearchContainer() {
             )}
           </Button>
         </form>
+        {error && (
+          <div className="mt-4 text-red-500 text-center">
+            {error}
+          </div>
+        )}
       </div>
 
       <div className="rounded-md border">

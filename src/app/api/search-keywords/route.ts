@@ -11,8 +11,26 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   const userId = session.user.id;
+
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { credits: true, creditsUsed: true }
+});
+
+  if (!user) {
+    return new Response(JSON.stringify({ error: "User not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+   // Check if user has enough credits
+   if (user.creditsUsed >= user.credits) {
+    return new Response(JSON.stringify({ error: 'INSUFFICIENT CREDITS' , message: "Please buy more credits to continue using the service."}), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 
   const { keyword } = await request.json();
 
