@@ -27,7 +27,7 @@ export function PageContent() {
       router.push('/articles');
     } else {
       console.error('Sign-in failed');
-      toast.error("Something went wrong")
+      toast.error("Loading Please Wait")
     }
   };
 

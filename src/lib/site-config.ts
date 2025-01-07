@@ -2,8 +2,8 @@ export const siteConfig = {
   title: "QuillAI",
   description:
     "Effortlessly generate highly SEO-optimized articles and keywords with QuillAI, empowering businesses and writers to create impactful content.",
-  url: "https://ai.quillai.com",
-  ogImage: "https://ai.quillai.com/og-image.png",
+  url: "https://ai.quillstash.com",
+  ogImage: "https://ai.quillstash.com/og-image.png",
   links: {
     discord: "https://discord.gg/vkYvY4D3RA",
   },

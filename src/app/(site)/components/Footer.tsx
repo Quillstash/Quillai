@@ -37,24 +37,24 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2">
               <li><a href="#" className="text-gray-600 hover:text-gray-900">Features</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Pricing</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">API</a></li>
+              <li><a href="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</a></li>
+              {/* <li><a href="#" className="text-gray-600 hover:text-gray-900">API</a></li> */}
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2">
               <li><a href="#" className="text-gray-600 hover:text-gray-900">About</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Blog</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Careers</a></li>
+              <li><a href="/https://quillstash.com" className="text-gray-600 hover:text-gray-900">Blog</a></li>
+              {/* <li><a href="/carrer" className="text-gray-600 hover:text-gray-900">Careers</a></li> */}
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Privacy</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Terms</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Cookie Policy</a></li>
+              <li><a href="/privacy" className="text-gray-600 hover:text-gray-900">Privacy</a></li>
+              <li><a href="/terms" className="text-gray-600 hover:text-gray-900">Terms</a></li>
+              {/* <li><a href="#" className="text-gray-600 hover:text-gray-900">Cookie Policy</a></li> */}
             </ul>
           </div>
         </div>

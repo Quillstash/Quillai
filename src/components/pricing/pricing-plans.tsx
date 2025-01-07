@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import Link from "next/link"
+import PaymentSupportModal from "./payment-support-modal"
 
 interface PricingPlan {
   monthlyId: string
@@ -73,25 +74,30 @@ const plans: PricingPlan[] = [
 export function PricingModal() {
   const [isYearly, setIsYearly] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isPricingOpen, setIsPricingOpen] = React.useState(false)
+  const [showPaymentSupport, setShowPaymentSupport] = React.useState(false)
 
-  const handleSubscribe = async (plan: PricingPlan) => {
+  const handleSubscribe = async () => {
     setIsLoading(true)
     try {
-      const planId = isYearly ? plan.yearlyId : plan.monthlyId;
-      const response = await fetch('/api/subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planId }),
-      })
+      setIsPricingOpen(false);
+      setShowPaymentSupport(true);
+      // const planId = isYearly ? plan.yearlyId : plan.monthlyId;
+      // const response = await fetch('/api/subscription', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ planId }),
+      // })
 
-      if (!response.ok) {
-        throw new Error('Failed to initiate subscription')
-      }
+      // if (!response.ok) {
+      //   throw new Error('Failed to initiate subscription')
+      // }
 
-      const { checkoutUrl } = await response.json()
-      window.open(checkoutUrl, '_blank');
+      // const { checkoutUrl } = await response.json()
+      // window.open(checkoutUrl, '_blank');
+      setIsLoading(false);
     } catch (error) {
       console.error('Subscription error:', error)
       toast.error("Failed to initiate subscription. Please try again.")
@@ -101,134 +107,139 @@ export function PricingModal() {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">Upgrade plan</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-6xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Select plan</DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end mb-8">
-          <div className="flex items-center gap-4 border rounded-lg p-1">
-            <button
-              onClick={() => setIsYearly(true)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                isYearly
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Yearly
-              <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
-                Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
-              </span>
-            </button>
-            <button
-              onClick={() => setIsYearly(false)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                !isYearly
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Monthly
-            </button>
+    <>
+      <Dialog open={isPricingOpen} onOpenChange={setIsPricingOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full">Upgrade plan</Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-6xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Select plan</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-end mb-8">
+            <div className="flex items-center gap-4 border rounded-lg p-1">
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  isYearly
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                Yearly
+                <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
+                  Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
+                </span>
+              </button>
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  !isYearly
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors relative"
-            >
-              {plan.name === "Pro Plan" && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
-                  Most Popular
+          <div className="grid md:grid-cols-3 gap-6">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors relative"
+              >
+                {plan.name === "Pro Plan" && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
+                    Most Popular
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold text-xl">{plan.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Billed {isYearly ? "yearly" : "monthly"}
+                  </p>
                 </div>
-              )}
+                <div className="space-y-2">
+                  <h4 className="text-4xl font-bold">
+                    ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                  </h4>
+                  {isYearly && (
+                    <p className="text-sm text-muted-foreground">
+                      <span className="line-through">${plan.originalYearlyPrice}</span>
+                      <span className="ml-2 text-green-600">
+                        {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
+                      </span>
+                    </p>
+                  )}
+                </div>
+                <ul className="space-y-2">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleSubscribe()}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Please wait
+                    </>
+                  ) : (
+                    "Select plan"
+                  )}
+                </Button>
+              </div>
+            ))}
+            <div className="border rounded-lg p-6 space-y-6 bg-muted/50">
               <div>
-                <h3 className="font-semibold text-xl">{plan.name}</h3>
+                <h3 className="font-semibold text-xl">Enterprise Plan</h3>
                 <p className="text-sm text-muted-foreground">
-                  Billed {isYearly ? "yearly" : "monthly"}
+                  Custom pricing
                 </p>
               </div>
               <div className="space-y-2">
-                <h4 className="text-4xl font-bold">
-                  ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                </h4>
-                {isYearly && (
-                  <p className="text-sm text-muted-foreground">
-                    <span className="line-through">${plan.originalYearlyPrice}</span>
-                    <span className="ml-2 text-green-600">
-                      {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
-                    </span>
-                  </p>
-                )}
+                <h4 className="text-4xl font-bold">Coming Soon</h4>
               </div>
               <ul className="space-y-2">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm">Custom article limit</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm">Unlimited linked pages</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm">Strategic support</span>
+                </li>
               </ul>
-              <Button 
-                className="w-full" 
-                onClick={() => handleSubscribe(plan)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
-                  </>
-                ) : (
-                  "Select plan"
-                )}
-              </Button>
+              <Button className="w-full" disabled>Contact Sales</Button>
             </div>
-          ))}
-          <div className="border rounded-lg p-6 space-y-6 bg-muted/50">
-            <div>
-              <h3 className="font-semibold text-xl">Enterprise Plan</h3>
-              <p className="text-sm text-muted-foreground">
-                Custom pricing
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-4xl font-bold">Coming Soon</h4>
-            </div>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-sm">Custom article limit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-sm">Unlimited linked pages</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-sm">Strategic support</span>
-              </li>
-            </ul>
-            <Button className="w-full" disabled>Contact Sales</Button>
           </div>
-        </div>
-        <div className="flex justify-start gap-4 mt-4">
-          <Button variant="ghost" size="sm">
-            Chat to us
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Link href="/pricing"> 
-            View full pricing
-            </Link>
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="flex justify-start gap-4 mt-4">
+            <Button variant="ghost" size="sm">
+              Chat to us
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Link href="/pricing">View full pricing</Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <PaymentSupportModal 
+        open={showPaymentSupport} 
+        onOpenChange={setShowPaymentSupport}
+      />
+    </>
   )
 }
 
