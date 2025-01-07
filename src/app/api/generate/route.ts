@@ -16,7 +16,7 @@ import { generateSectionPrompts } from "@/utils/ai-prompts";
 
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
   const { keyword, userId } = await req.json();
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -143,10 +143,11 @@ export async function POST(req: Request) {
           .trim();
         
         return cleaned;
-      } catch {
-        return section;
+      } catch(error) {
+        console.error("Failed to process completed article:", error);
+        return '';
       }
-    });
+    }).filter((section): section is string => section !== undefined);
 
     const completeResponse = articleSections.join("\n\n");
     console.log("Complete article content:", completeResponse);
@@ -228,6 +229,11 @@ export async function POST(req: Request) {
     });
   
 
-    return { success: false, message: "Failed to generate article" };
-  }
+    return new Response(
+      JSON.stringify({ success: false, message: "Failed to generate article" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );  }
 }
