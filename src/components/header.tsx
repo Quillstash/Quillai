@@ -18,7 +18,7 @@ import { signOut, useSession } from 'next-auth/react';
 //   }, [user, router]);
 
   return (
-    <nav className='sticky z-[100] h-16 inset-x-0 top-0 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all'>
+    <nav className='sticky z-[20] h-16 inset-x-0 top-0 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all'>
       <Container>
         <div className='flex h-16 items-center justify-between'>
           <Link 

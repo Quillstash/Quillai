@@ -2,7 +2,15 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import Typewriter from "typewriter-effect";
 import { useRef, useEffect, useState } from "react";
-
+import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Features } from "./howitworks";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BackgroundShape = ({ initialX, initialY }:any) => {
   const { scrollYProgress } = useScroll();
@@ -78,18 +86,32 @@ export const Hero = () => {
             whileTap={{ scale: 0.95 }}
             className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium"
           >
+            <Link href="/login">
+            
             Start Free Trial
+            </Link>
           </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
-          >
-            How It Works
-          </motion.button>
-        </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 border border-gray-300   rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+              >
+                How It Works
+              </motion.button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-4xl max-h-[75vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-center mb-4">
+                  Welcome to QuillAi
+                </DialogTitle>
+              </DialogHeader>
+              <Features />
+            </DialogContent>
+          </Dialog>
 
-      
+          </div>
       </motion.div>
 
       {/* Background Shapes */}
