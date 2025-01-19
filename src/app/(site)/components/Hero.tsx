@@ -11,8 +11,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Features } from "./howitworks";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const BackgroundShape = ({ initialX, initialY }:any) => {
+interface BackgroundShapeProps {
+  initialX: number;
+  initialY: number;
+}
+
+const BackgroundShape = ({ initialX, initialY }: BackgroundShapeProps) => {
   const { scrollYProgress } = useScroll();
   const x = useTransform(scrollYProgress, [0, 1], [initialX, 0]);
   const y = useTransform(scrollYProgress, [0, 1], [initialY, 0]);
@@ -49,10 +53,11 @@ export const Hero = () => {
         transition={{ duration: 0.8 }}
         className="text-center max-w-4xl mx-auto"
       >
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
-          Create. Rank. Dominate.
-        </h1>
-        <div className="text-xl md:text-2xl text-gray-600 mb-8 h-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4 md:text-5xl lg:text-6xl">
+              Write Content That{" "}
+              <span className="text-primary">Actually Ranks</span>
+            </h1>
+        <div className="text-xl md:text-2xl text-gray-600 mb-2 h-12">
           <Typewriter
             options={{
               strings: ["Write Smarter...", "Rank Faster...", "Save Time..."],
@@ -61,9 +66,10 @@ export const Hero = () => {
             }}
           />
         </div>
-        <p className="text-xl text-gray-600 mb-8">
-          Your all-in-one AI article generator for SEO success.
-        </p>
+        <p className="text-lg text-gray-800 md:text-xl mb-4">
+              Stop wasting time on content that gets buried. Our AI-powered platform
+              helps you create SEO-optimized content that ranks higher, faster.
+            </p>
           {/* Onboarding Video Section */}
           <div className="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
           {/* <h2 className="text-2xl font-semibold text-gray-800 p-4">

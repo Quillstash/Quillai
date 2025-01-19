@@ -119,6 +119,7 @@ export function PricingModal() {
           <div className="flex justify-end mb-8">
             <div className="flex items-center gap-4 border rounded-lg p-1">
               <button
+                type="button"
                 onClick={() => setIsYearly(true)}
                 className={`px-3 py-1.5 rounded-md transition-colors ${
                   isYearly
@@ -132,6 +133,7 @@ export function PricingModal() {
                 </span>
               </button>
               <button
+                type="button"
                 onClick={() => setIsYearly(false)}
                 className={`px-3 py-1.5 rounded-md transition-colors ${
                   !isYearly

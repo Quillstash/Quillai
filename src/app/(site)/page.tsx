@@ -4,6 +4,7 @@
 import { FAQ } from "./components/FAQ";
 import { Features } from "./components/Features";
 import { Hero } from "./components/Hero";
+import { PainPoints } from "./components/Painpoints";
 import { Testimonials } from "./components/Testimonials";
 // import { useEffect } from "react";
 // import { getSession } from "next-auth/react";
@@ -29,6 +30,7 @@ function Page() {
     <div className="min-h-screen">
       {/* <Navbar /> */}
        <Hero />
+       <PainPoints/>
      <Features />
       <Testimonials />
       <FAQ />

@@ -1,14 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
-import { Facebook, Twitter, Instagram, Github } from "lucide-react";
+import {  Twitter,  Github } from "lucide-react";
 import Image from "next/image";
 
 export const Footer = () => {
   const socialLinks = [
-    { icon: Facebook, href: "#" },
-    { icon: Twitter, href: "#" },
-    { icon: Instagram, href: "#" },
-    { icon: Github, href: "#" },
+    { icon: Twitter, href: "https://x.com/DobaIbrahim" },
+    { icon: Github, href: "https://github.com/IbrahimDoba" },
   ];
 
   return (
@@ -23,9 +21,9 @@ export const Footer = () => {
             </p>
             {/* Social Links */}
             <div className="flex space-x-4">
-              {socialLinks.map((social, index) => (
+              {socialLinks.map((social) => (
                 <motion.a
-                  key={index}
+                  key={social.href}
                   href={social.href}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -41,15 +39,14 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Features</a></li>
               <li><a href="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">About</a></li>
-              <li><a href="/https://quillstash.com" className="text-gray-600 hover:text-gray-900">Blog</a></li>
+              <li><a href="/about" className="text-gray-600 hover:text-gray-900">About</a></li>
+              <li><a href="https://quillstash.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900">Blog</a></li>
             </ul>
           </div>
           <div>

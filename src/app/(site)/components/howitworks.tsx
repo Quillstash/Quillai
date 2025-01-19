@@ -45,8 +45,8 @@ export const Features = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {features.map((feature, index) => (
-        <Card key={index} className="border-2">
+      {features.map((feature) => (
+        <Card key={feature.title.toLowerCase().replace(/\s+/g, '-')} className="border-2">
           <CardHeader className="flex flex-row items-center gap-4">
             {feature.icon}
             <div className="flex-1">

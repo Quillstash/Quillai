@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
+import DiscordCard from "./DiscordCard";
 
 const testimonials = [
   {
@@ -27,7 +28,7 @@ const testimonials = [
 
 export const Testimonials = () => {
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-purple-50 to-white">
+    <section className="py-10 px-4 bg-gradient-to-b from-purple-50 to-white flex flex-col items-center">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +43,7 @@ export const Testimonials = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
-              key={index}
+              key={`${testimonial.name}-${testimonial.company}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -51,7 +52,7 @@ export const Testimonials = () => {
             >
               <div className="flex mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Star key={`${testimonial.name}-star-${i}`} className="w-5 h-5 text-yellow-400 fill-current" />
                 ))}
               </div>
               <p className="text-gray-600 mb-4">{testimonial.content}</p>
@@ -62,6 +63,9 @@ export const Testimonials = () => {
             </motion.div>
           ))}
         </div>
+      </div>
+      <div className="mt-16">
+        <DiscordCard />
       </div>
     </section>
   );
