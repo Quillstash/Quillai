@@ -86,6 +86,9 @@ export default {
 				"50%": { transform: "translateY(-10px)" },
 			  },
   		},
+		  screens: {
+			xl: '1200px', // Custom breakpoint for 1200px
+		  },
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',

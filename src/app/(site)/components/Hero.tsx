@@ -23,14 +23,14 @@ export const Hero = () => {
     <FloatingElement 
   icon={Bot} 
   top="7%" 
-  left="13%" 
+  left="10%" 
   color="text-[#3B82F6]" 
 />
 
 <FloatingElement 
   icon={FileText} 
   top="20%" 
-  right="12%" 
+  right="10%" 
   color="text-[#8B5CF6]" 
 />
 
@@ -44,21 +44,21 @@ export const Hero = () => {
 <FloatingElement 
   icon={Lightbulb} 
   top="7%" 
-  right="15%" 
+  right="12%" 
   color="text-[#FACC15]" 
 />
 
 <FloatingElement 
   icon={Feather} 
   top="25%" 
-  left="16%" 
+  left="9%" 
   color="text-[#EC4899]" 
 />
 
 <FloatingElement 
   icon={Chrome} 
   top="40%" 
-  right="14%" 
+  right="11%" 
   color="text-[#3B82F6]" 
 />
 

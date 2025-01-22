@@ -28,7 +28,7 @@ export const FloatingElement = ({
   return (
     <motion.div
       className={cn(
-        `absolute hidden lg:block animate-float`,
+        "absolute hidden xl:block animate-float",
         className
       )}
       style={{ top, left, right, y }}
