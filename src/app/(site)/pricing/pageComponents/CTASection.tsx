@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Container } from "./pricingContainer"
 import { Button } from "@/components/ui/button"
 
@@ -8,7 +9,9 @@ export function CTASection() {
       <p className="text-xl text-muted-foreground mb-8">
         Join thousands of satisfied customers and take your business to the next level.
       </p>
-      <Button size="lg">Start Your Free Trial</Button>
+     <Link href='/login'>
+     <Button size="lg">Start Your Free Trial</Button>
+     </Link> 
     </Container>
   )
 }

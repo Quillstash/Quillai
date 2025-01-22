@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import db from "@/lib/db"
-import { PLANS } from '@prisma/client'
+import type { PLANS } from '@prisma/client'
 
 interface SubscriptionData {
   planName: PLANS;

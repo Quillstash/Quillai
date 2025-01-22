@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { InfoIcon, Search } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -65,6 +65,9 @@ export function KeywordSearchContainer() {
           <h1 className="text-3xl font-bold mb-2">Search by Keywords</h1>
           <p className="text-lg text-muted-foreground">
             Find longtail and semantic keywords in your niche
+          </p>
+          <p className="text-xs text-muted-foreground text-center mt-2 flex justify-center items-center gap-1">
+           <InfoIcon size={16}/> Each Keyword Search uses 1 credit
           </p>
         </div>
         <form onSubmit={handleSearch} className="flex gap-2">

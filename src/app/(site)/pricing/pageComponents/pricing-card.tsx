@@ -5,67 +5,38 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Container } from "./pricingContainer";
-import Link from "next/link";
 import PaymentSupportModal from "@/components/pricing/payment-support-modal";
 
 interface PricingPlan {
-  monthlyId: string;
-  yearlyId: string;
+  id: string;
   name: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  originalYearlyPrice: number;
+  price: number;
+  credits: number;
+  articleGenerations: number;
+  regenerationsPerArticle: number;
   features: string[];
-  articles: number;
-  extraArticlePrice: number;
-  linkedPages: number;
-  regenerations: number;
-  support: string;
+  isPopular?: boolean;
 }
 
 const plans: PricingPlan[] = [
   {
-    monthlyId: "638793",
-    yearlyId: "638802",
-    name: "Basic Plan",
-    monthlyPrice: 25,
-    yearlyPrice: 240,
-    originalYearlyPrice: 300,
-    articles: 25,
-    extraArticlePrice: 1.5,
-    linkedPages: 250,
-    regenerations: 1,
-    support: "24/7 Live discord support",
+    id: "one-time-basic",
+    name: "Complete Package",
+    price: 15,
+    credits: 80,
+    articleGenerations: 30,
+    regenerationsPerArticle: 5,
     features: [
-      "25 Articles per month",
-      "$1.5 per extra article",
-      "1 free regeneration per article",
-      "24/7 Live discord support",
+      "60 Credits",
+      "30 Article Generations",
+      "5 Free Regenerations per Article",
+      "24/7 Support Access",
     ],
-  },
-  {
-    monthlyId: "638800",
-    yearlyId: "638803",
-    name: "Pro Plan",
-    monthlyPrice: 45,
-    yearlyPrice: 360,
-    originalYearlyPrice: 450,
-    articles: 75,
-    extraArticlePrice: 1,
-    linkedPages: 1000,
-    regenerations: 1,
-    support: "24/7 Live discord support",
-    features: [
-      "75 Articles per month",
-      "$1 per extra article",
-      "1 free regenerations per article",
-      "24/7 Live discord support",
-    ],
-  },
+    isPopular: true
+  }
 ];
 
 export function PricingCards() {
-  const [isYearly, setIsYearly] = React.useState(false);
   const [showPaymentSupport, setShowPaymentSupport] = React.useState(false);
 
   const handleSubscribe = () => {
@@ -75,37 +46,10 @@ export function PricingCards() {
   return (
     <>
       <Container className="py-10">
-        <div className="flex justify-end mb-8">
-          <div className="flex items-center gap-4 border rounded-lg p-1">
-            <button
-              onClick={() => setIsYearly(true)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                isYearly
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Yearly
-              <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
-                Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
-              </span>
-            </button>
-            <button
-              onClick={() => setIsYearly(false)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                !isYearly
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Monthly
-            </button>
-          </div>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="flex justify-center items-center">
           {plans.map((plan) => (
-            <Card key={plan.name} className="flex flex-col hover:border-primary transition-colors relative">
-              {plan.name === "Pro Plan" && (
+            <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors relative">
+              {plan.isPopular && (
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
                   Most Popular
                 </div>
@@ -113,22 +57,17 @@ export function PricingCards() {
               <CardHeader>
                 <CardTitle>{plan.name}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Billed {isYearly ? "yearly" : "monthly"}
+                  One-time payment
                 </p>
               </CardHeader>
               <CardContent className="flex-grow">
                 <div className="space-y-2">
                   <h4 className="text-4xl font-bold">
-                    ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                    ${plan.price}
                   </h4>
-                  {isYearly && (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="line-through">${plan.originalYearlyPrice}</span>
-                      <span className="ml-2 text-green-600">
-                        {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
-                      </span>
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Lifetime access
+                  </p>
                 </div>
                 <ul className="mt-4 space-y-2">
                   {plan.features.map((feature) => (
@@ -144,12 +83,12 @@ export function PricingCards() {
                   className="w-full" 
                   onClick={handleSubscribe}
                 >
-                  Select plan
+                  Purchase Now
                 </Button>
               </CardFooter>
             </Card>
           ))}
-          <Card className="flex flex-col bg-muted/50">
+          {/* <Card className="flex flex-col bg-muted/50">
             <CardHeader>
               <CardTitle>Enterprise Plan</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -163,31 +102,31 @@ export function PricingCards() {
               <ul className="mt-4 space-y-2">
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Custom article limit</span>
+                  <span className="text-sm">Custom credit allocation</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Unlimited linked pages</span>
+                  <span className="text-sm">Unlimited article generations</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Strategic support</span>
+                  <span className="text-sm">Priority support</span>
                 </li>
               </ul>
             </CardContent>
             <CardFooter>
               <Button className="w-full" onClick={handleSubscribe}>Contact Sales</Button>
             </CardFooter>
-          </Card>
+          </Card> */}
         </div>
-        <div className="flex justify-start gap-4 mt-4">
+        <div className="flex justify-center gap-4 mt-4 rounded-xl font-bold ">
           <Button variant="ghost" size="sm" onClick={handleSubscribe}>
             Chat to us
           </Button>
           <Button variant="ghost" size="sm">
-            <Link href="/pricing">
-              View full pricing
-            </Link>
+            {/* <Link href="/pricing">
+              Learn more
+            </Link> */}
           </Button>
         </div>
       </Container>
@@ -199,7 +138,6 @@ export function PricingCards() {
     </>
   );
 }
-
 
 
 

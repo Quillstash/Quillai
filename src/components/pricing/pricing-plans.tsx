@@ -16,63 +16,36 @@ import Link from "next/link"
 import PaymentSupportModal from "./payment-support-modal"
 
 interface PricingPlan {
-  monthlyId: string
-  yearlyId: string
+  id: string
   name: string
-  monthlyPrice: number
-  yearlyPrice: number
-  originalYearlyPrice: number
+  price: number
+  credits: number
+  articleGenerations: number
+  regenerationsPerArticle: number
   features: string[]
-  articles: number
-  extraArticlePrice: number
-  linkedPages: number
-  regenerations: number
-  support: string
+  isPopular?: boolean
 }
 
 const plans: PricingPlan[] = [
   {
-    monthlyId: '638793',
-    yearlyId: '638802',
-    name: "Basic Plan",
-    monthlyPrice: 25,
-    yearlyPrice: 240,
-    originalYearlyPrice: 300,
-    articles: 10,
-    extraArticlePrice: 8.5,
-    linkedPages: 250,
-    regenerations: 1,
-    support: "Live chat support",
+    id: 'one-time-basic',
+    name: "Complete Package",
+    price: 15,
+    credits: 80,
+    articleGenerations: 30,
+    regenerationsPerArticle: 5,
     features: [
-      "25 Articles per month",
-      "$1.5 per extra article",
-      "1 free regeneration per article",
-      "24/7 Live discord support"
-    ]
-  },
-  {
-    monthlyId: '638800',
-    yearlyId: '638803',
-    name: "Pro Plan",
-    monthlyPrice: 45,
-    yearlyPrice: 360,
-    originalYearlyPrice: 450,
-    articles: 40,
-    extraArticlePrice: 7,
-    linkedPages: 1000,
-    regenerations: 1,
-    support: "Live chat support",
-    features: [
-      "75 Articles per month",
-      "$1 per extra article",
-      "1 free regenerations per article",
-      "24/7 Live discord support"
-    ]
+      "60 Credits",
+      "30 Article Generations",
+      "5 Free Regenerations per Article",
+      "24/7 Support Access"
+    ],
+    isPopular: true
   }
+  // Add more plans here in the future if needed
 ]
 
 export function PricingModal() {
-  const [isYearly, setIsYearly] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [isPricingOpen, setIsPricingOpen] = React.useState(false)
   const [showPaymentSupport, setShowPaymentSupport] = React.useState(false)
@@ -80,27 +53,12 @@ export function PricingModal() {
   const handleSubscribe = async () => {
     setIsLoading(true)
     try {
-      setIsPricingOpen(false);
-      setShowPaymentSupport(true);
-      // const planId = isYearly ? plan.yearlyId : plan.monthlyId;
-      // const response = await fetch('/api/subscription', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ planId }),
-      // })
-
-      // if (!response.ok) {
-      //   throw new Error('Failed to initiate subscription')
-      // }
-
-      // const { checkoutUrl } = await response.json()
-      // window.open(checkoutUrl, '_blank');
-      setIsLoading(false);
+      setIsPricingOpen(false)
+      setShowPaymentSupport(true)
+      setIsLoading(false)
     } catch (error) {
-      console.error('Subscription error:', error)
-      toast.error("Failed to initiate subscription. Please try again.")
+      console.error('Payment error:', error)
+      toast.error("Failed to process payment. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -110,48 +68,19 @@ export function PricingModal() {
     <>
       <Dialog open={isPricingOpen} onOpenChange={setIsPricingOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">Upgrade plan</Button>
+          <Button variant="outline" className="w-full">Get Started</Button>
         </DialogTrigger>
-        <DialogContent className="max-w-6xl">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">Select plan</DialogTitle>
+            <DialogTitle className="text-xl">Choose your plan</DialogTitle>
           </DialogHeader>
-          <div className="flex justify-end mb-8">
-            <div className="flex items-center gap-4 border rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setIsYearly(true)}
-                className={`px-3 py-1.5 rounded-md transition-colors ${
-                  isYearly
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                Yearly
-                <span className="ml-2 text-xs bg-green-500/20 text-green-600 rounded px-1.5 py-0.5">
-                  Save up to {Math.round((1 - plans[1].yearlyPrice / plans[1].originalYearlyPrice) * 100)}%
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsYearly(false)}
-                className={`px-3 py-1.5 rounded-md transition-colors ${
-                  !isYearly
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="flex justify-center items-center  ">
             {plans.map((plan) => (
               <div
-                key={plan.name}
-                className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors relative"
+                key={plan.id}
+                className="border rounded-lg p-6 space-y-6 hover:border-primary transition-colors relative "
               >
-                {plan.name === "Pro Plan" && (
+                {plan.isPopular && (
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-tr-lg rounded-bl-lg">
                     Most Popular
                   </div>
@@ -159,21 +88,16 @@ export function PricingModal() {
                 <div>
                   <h3 className="font-semibold text-xl">{plan.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Billed {isYearly ? "yearly" : "monthly"}
+                    One-time payment
                   </p>
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-4xl font-bold">
-                    ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                    ${plan.price}
                   </h4>
-                  {isYearly && (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="line-through">${plan.originalYearlyPrice}</span>
-                      <span className="ml-2 text-green-600">
-                        {Math.round((1 - plan.yearlyPrice / plan.originalYearlyPrice) * 100)}% off
-                      </span>
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Lifetime access
+                  </p>
                 </div>
                 <ul className="space-y-2">
                   {plan.features.map((feature) => (
@@ -185,53 +109,27 @@ export function PricingModal() {
                 </ul>
                 <Button 
                   className="w-full" 
-                  onClick={() => handleSubscribe()}
+                  onClick={handleSubscribe}
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Please wait
+                      Processing
                     </>
                   ) : (
-                    "Select plan"
+                    "Purchase Now"
                   )}
                 </Button>
               </div>
             ))}
-            <div className="border rounded-lg p-6 space-y-6 bg-muted/50">
-              <div>
-                <h3 className="font-semibold text-xl">Enterprise Plan</h3>
-                <p className="text-sm text-muted-foreground">
-                  Custom pricing
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="text-4xl font-bold">Coming Soon</h4>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Custom article limit</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Unlimited linked pages</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm">Strategic support</span>
-                </li>
-              </ul>
-              <Button className="w-full" disabled>Contact Sales</Button>
-            </div>
           </div>
           <div className="flex justify-start gap-4 mt-4">
             <Button variant="ghost" size="sm">
               Chat to us
             </Button>
             <Button variant="ghost" size="sm">
-              <Link href="/pricing">View full pricing</Link>
+              <Link href="/pricing">Learn more</Link>
             </Button>
           </div>
         </DialogContent>
@@ -244,4 +142,3 @@ export function PricingModal() {
     </>
   )
 }
-

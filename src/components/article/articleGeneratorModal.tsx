@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Wand2 } from "lucide-react";
+import { InfoIcon, Wand2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Article } from "@prisma/client";
+import type { Article } from "@prisma/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSubscription } from "@/hooks/useSubscription";
 
@@ -160,6 +160,9 @@ export function ArticleGeneratorModal({
               You must be logged in to generate articles.
             </p>
           )}
+            <p className="text-xs text-muted-foreground text-center mt-2 flex justify-center items-center gap-1">
+           <InfoIcon size={16}/> Each article generation uses 2 credits
+          </p>
         </form>
       </DialogContent>
       {creditError && (

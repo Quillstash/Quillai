@@ -32,7 +32,7 @@ model User {
   email               String?   @unique
   emailVerified       DateTime?
   image               String?
-  credits             Int       @default(5)
+  credits             Int       @default(6)
   plan                PLANS     @default(FREE)
   creditsUsed         Int       @default(0)
   currentPeriodEnd    DateTime?
