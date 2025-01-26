@@ -54,21 +54,21 @@ import { signOut, useSession } from 'next-auth/react';
               </>
             ) : (
               <>
-                <Link
+                {/* <Link
                   href='/login'
                   className={buttonVariants({
-                    size: 'default',
+                    size: 'default',  
                     variant: 'ghost',
                     className: 'hover:bg-purple-50',
                   })}
                 >
                   Sign In
-                </Link>
+                </Link> */}
 
                 <div className='h-8 w-px bg-zinc-200 hidden sm:block' />
 
                 <Link
-                  href='/articles'
+                  href='/login'
                   className={buttonVariants({
                     size: 'default',
                     className: 'hidden sm:flex items-center gap-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90 transition-opacity',

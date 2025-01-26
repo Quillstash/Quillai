@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import db from "@/lib/db";
 import {  Check, Crown } from "lucide-react";
 import { PricingModal } from "@/components/pricing/pricing-plans";
+import  PreferencesEditDialog  from "./components/editPreferredPref";
 
 async function getUserSubscription(userId: string) {
   const user = await db.user.findUnique({
@@ -14,7 +15,9 @@ async function getUserSubscription(userId: string) {
       credits: true,
       creditsUsed: true,
       currentPeriodEnd: true,
-      subscriptionStatus: true
+      subscriptionStatus: true,
+      preferredTone: true,
+      targetAudience: true,
     }
   });
 
@@ -66,6 +69,33 @@ export default async function ProfilePage() {
             {user.email ? `Signed up with ${user.email.split("@")[1]}` : "No connected account"}
           </p>
         </div>
+          {/* New Preferences Section */}
+          <div className="space-y-4 pb-4 border-b">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Writing Preferences</h4>
+            <PreferencesEditDialog 
+              currentTone={subscription?.preferredTone || 'professional'}
+              currentAudience={subscription?.targetAudience || ''}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div>
+              <p className="text-sm font-medium">Preferred Tone</p>
+              <p className="text-sm text-muted-foreground capitalize">
+                {subscription?.preferredTone || 'Not set'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Target Audience</p>
+              <p className="text-sm text-muted-foreground">
+                {subscription?.targetAudience || 'Not specified'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-4 border-b">
             <div className="space-y-1">

@@ -24,7 +24,7 @@ export function PageContent() {
     setLoadingState(false);
 
     if (signInResult?.ok) {
-      router.push('/articles');
+      router.push('/onboarding');
     } else {
       console.error('Sign-in failed');
       toast.error("Loading Please Wait")

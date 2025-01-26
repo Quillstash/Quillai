@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const requestBody = await req.json();
     const validatedData = onboardingSchema.parse(requestBody);
-
+    
     const updatedUser = await db.user.update({
       where: { id: session.user.id },
       data: {
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         onboardingCompleted: true,
       },
     });
-
+    console.log(updatedUser)
     return NextResponse.json({
       success: true,
       user: {

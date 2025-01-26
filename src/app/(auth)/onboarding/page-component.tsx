@@ -16,7 +16,6 @@ import { useState } from 'react'
 import Confetti from 'react-confetti'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-// import { auth } from '@/auth'
 
 const formSchema = z.object({
   preferredTone: z.enum(['professional', 'casual', 'academic', 'conversational', 'humorous', 'persuasive']),
@@ -30,19 +29,7 @@ export default function OnboardingPageComponent() {
   const [showModal, setShowModal] = useState(false)
   const router = useRouter()
 
-  // useEffect(() => {
-  //   const CheckOnboardingStatus = async () => {
-  //     const session = await auth();
-
-  //     if (session?.user?.onboardingCompleted ) { // pls pass the onboarding to the session so it can check if the user has completed it, 
-  //       router.replace('/articles'); // if the user has compelted it nd he comes to this page redirect him to articles. else allow him
-  //     }
-  //   };
-
-  //   CheckOnboardingStatus();
-  // }, [router]);
-
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       preferredTone: 'professional',
@@ -60,7 +47,7 @@ export default function OnboardingPageComponent() {
         },
         body: JSON.stringify(data),
       })
-
+      console.log(data)
       if (!response.ok) {
         throw new Error('Failed to complete onboarding')
       }
@@ -86,7 +73,10 @@ export default function OnboardingPageComponent() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-1">Preferred Tone</label>
-              <Select onValueChange={(value) => register('preferredTone').onChange({ target: { value } })}>
+              <Select 
+                defaultValue="professional"
+                onValueChange={(value: 'professional' | 'casual' | 'academic' | 'conversational' | 'humorous' | 'persuasive') => setValue('preferredTone', value)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a tone" />
                 </SelectTrigger>
@@ -140,7 +130,7 @@ export default function OnboardingPageComponent() {
 
       {/* Footer */}
       <footer className="w-full bg-gray-100 py-4 text-center">
-        <p className="text-sm text-gray-500">© 2024 Your Company. All rights reserved.</p>
+        <p className="text-sm text-gray-500">© 2025 Your Company. All rights reserved.</p>
       </footer>
     </div>
   )

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 async function Page() {
   const session = await getSession();
   if (session) {
-    redirect('/articles');
+    redirect('/onboarding');
   }
   return (
     <div className='grid place-content-center h-screen'>

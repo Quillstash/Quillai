@@ -54,7 +54,7 @@ export function Pricing() {
               </CardHeader>
 
               <CardContent className="relative px-6 pt-8 pb-4">
-                <div className="space-y-4 bg-amber-50 p-6 rounded-xl">
+                <div className="space-y-4 p-6 rounded-xl">
                   {[
                       "60 Credits",
                       "30 Article Generations",
