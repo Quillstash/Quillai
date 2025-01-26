@@ -8,7 +8,7 @@ import { Hero } from "./components/Hero";
 import { PainPoints } from "./components/Painpoints";
 import { Pricing } from "./components/pricing";
 import { Testimonials } from "./components/Testimonials";
-import WorkflowComparison from "./components/workFlow";
+// import WorkflowComparison from "./components/workFlow";
 
 function Page() {
   //   const router = useRouter();
@@ -29,7 +29,7 @@ function Page() {
     <div>
       {/* <Navbar /> */}
       <Hero />
-      <WorkflowComparison />
+      {/* <WorkflowComparison /> */}
       <PainPoints />
       <Features />
       <Testimonials />
