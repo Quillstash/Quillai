@@ -9,7 +9,6 @@ const articleUpdateSchema = z.object({
     .string()
     .min(1, 'Title cannot be empty')
     .max(100, 'Title is too long'),
-  description: z.string().nullable(),
   content: z.string(),
   coverImage: z.string().url().nullable(),
   keywords: z.array(z.string()),
@@ -64,32 +63,31 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const id = (await params).id;
+  const { id } = params;
 
   try {
     const user = await validateRequest();
-    if (!user) return;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const validatedData = articleUpdateSchema.parse(body);
+    // console.log('Raw body:', body); // Log the raw body to see what's being received
 
+    const validatedData = articleUpdateSchema.parse(body);
+    // console.log('Validated data:', validatedData);
+    
     const updatedArticle = await db.article.update({
-      where: { id: id, authorId: id },
+      where: { id, authorId: user.id }, // Use user.id instead of id
       data: {
         ...validatedData,
         updatedAt: new Date(),
       },
     });
 
-    if (!updatedArticle) {
-      return NextResponse.json({ error: 'Article not found' }, { status: 404 });
-    }
-
     return NextResponse.json({ success: true, article: updatedArticle });
   } catch (error) {
-    console.error('Update article error:', error);
+    console.error('Full error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
