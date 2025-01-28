@@ -1,5 +1,5 @@
 // app/api/chat/route.ts
-import { streamText, StreamTextResult } from "ai";
+import { streamText, type StreamTextResult } from "ai";
 import db from "@/lib/db";
 import { generateSlug } from "@/lib/services";
 
@@ -20,7 +20,15 @@ export async function POST(req: Request): Promise<Response> {
   const { keyword, userId } = await req.json();
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { preferredTone: true, targetAudience: true, credits: true, creditsUsed: true },
+    select: {
+      preferredTone: true,
+      targetAudience: true,
+      credits: true,
+      creditsUsed: true,
+      siteUrl: true,
+      metaDescription: true,
+      blogLinks: true,
+    },
   });
 
   if (!user) {
@@ -30,13 +38,13 @@ export async function POST(req: Request): Promise<Response> {
     });
   }
 
-    // Check if user has enough credits
-    if (user.creditsUsed >= user.credits) {
-      return new Response(JSON.stringify({ error: 'INSUFFICIENT_CREDITS' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    }
+  // Check if user has enough credits
+  if (user.creditsUsed >= user.credits) {
+    return new Response(JSON.stringify({ error: "INSUFFICIENT_CREDITS" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const title = await generateTitle(keyword);
   const slug = generateSlug(title);
 
@@ -50,15 +58,27 @@ export async function POST(req: Request): Promise<Response> {
       authorId: userId,
     },
   });
-  console.log(article)
+  console.log(user.siteUrl, user.blogLinks,user.metaDescription);
   const basePrompt = `
     Generate a high-quality, SEO-optimized, and human-like article using the following guidelines:
 
     Topic: ${title}
-    Target audience: ${user.targetAudience || 'general readers'}
+    Target audience: ${user.targetAudience || "general readers"}
     Article length: 1000 - 1200 words
-    Tone: ${user.preferredTone || 'professional'}
+    Tone: ${user.preferredTone || "professional"}
     Keyword to optimize for: ${keyword}
+
+    Personalization Requirements:
+      - Brand URL: ${user.siteUrl} (use for absolute internal links)
+      - Preferred Internal Links: ${
+        user.blogLinks.length > 0
+          ? user.blogLinks.join(", ")
+          : "Generate relevant internal links"
+      }
+      - Meta Direction: ${
+        user.metaDescription || "Focus on comprehensive coverage"
+      }
+
 
     Article structure:
     - Engaging introduction with a hook
@@ -75,13 +95,24 @@ export async function POST(req: Request): Promise<Response> {
     - Offer a unique perspective or angle on the topic
     - Include up-to-date information and recent developments
     - Use transitional phrases between paragraphs
+      - Create 2-3 internal links using absolute URLs (${user.siteUrl}/[slug])
+      ${
+        user.blogLinks.length > 0
+          ? `- Prioritize linking to: ${ user.blogLinks.slice(0, 3).join(", ")}`
+          : ""
+      }
+      - Align content structure with ${user.siteUrl}'s existing content strategy
+
 
     Content guidelines:
-    - Write in a ${user.preferredTone || 'professional'} tone
+    - Write in a ${user.preferredTone || "professional"} tone
     - Use active voice and present tense
     - Include current statistics and studies
     - Provide actionable insights
     - Address reader questions proactively
+    - Mirror ${user.siteUrl}'s brand voice in tone and examples
+    - Reference ${user.siteUrl} as an authority where appropriate
+    - Use real examples from ${user.siteUrl}'s existing content when possible
 
  Formatting requirements:
     - Do not include section labels like "Body Section 1" or "Introduction" but ensure the content is structured accordingly
@@ -94,7 +125,7 @@ export async function POST(req: Request): Promise<Response> {
     Return the content as clean HTML without any markdown or section markers.
   `;
 
-  const sectionPrompts = generateSectionPrompts(basePrompt, title, keyword);
+  const sectionPrompts = generateSectionPrompts(basePrompt, title, keyword, user.siteUrl ?? '' ,user.blogLinks, user.metaDescription ?? '');
 
   let articleSections: string[] = [];
 
@@ -107,7 +138,8 @@ export async function POST(req: Request): Promise<Response> {
           messages: [
             {
               role: "system",
-              content: "You are an expert tech content writer specializing in SEO-optimized articles.",
+              content:
+                "You are an expert tech content writer specializing in SEO-optimized articles.",
             },
             {
               role: "user",
@@ -115,7 +147,7 @@ export async function POST(req: Request): Promise<Response> {
             },
           ],
           onChunk: ({ chunk }) => {
-            if (chunk.type === 'text-delta') {
+            if (chunk.type === "text-delta") {
               process.stdout.write(`Section ${index + 1}: ${chunk.textDelta}`);
             }
           },
@@ -124,7 +156,7 @@ export async function POST(req: Request): Promise<Response> {
     );
 
     for (const result of streamResults) {
-      let sectionContent = '';
+      let sectionContent = "";
       for await (const chunk of result.textStream) {
         sectionContent += chunk;
       }
@@ -132,22 +164,24 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // Process the generated content
-    articleSections = articleSections.map((section) => {
-      try {
-        const cleaned = section
-          .replace(/```\s*html\n?/g, '')
-          .replace(/```/g, '')
-          .replace(/Body Section \d+:/g, '')
-          .replace(/Introduction:/g, '')
-          .replace(/Conclusion:/g, '')
-          .trim();
-        
-        return cleaned;
-      } catch(error) {
-        console.error("Failed to process completed article:", error);
-        return '';
-      }
-    }).filter((section): section is string => section !== undefined);
+    articleSections = articleSections
+      .map((section) => {
+        try {
+          const cleaned = section
+            .replace(/```\s*html\n?/g, "")
+            .replace(/```/g, "")
+            .replace(/Body Section \d+:/g, "")
+            .replace(/Introduction:/g, "")
+            .replace(/Conclusion:/g, "")
+            .trim();
+
+          return cleaned;
+        } catch (error) {
+          console.error("Failed to process completed article:", error);
+          return "";
+        }
+      })
+      .filter((section): section is string => section !== undefined);
 
     const completeResponse = articleSections.join("\n\n");
     console.log("Complete article content:", completeResponse);
@@ -181,8 +215,12 @@ export async function POST(req: Request): Promise<Response> {
           coverImage: coverImages[0]?.url || "",
           generatingState: "GENERATED",
           wordCount: analysis?.wordCount || 0,
-          articleRating: `SEO: ${analysis?.seo.rating || 'N/A'}, Structure: ${analysis?.structure.rating || 'N/A'}, Tone: ${analysis?.tone.rating || 'N/A'}`,
-          RatingComment: `SEO: ${analysis?.seo.comment || 'N/A'}\nStructure: ${analysis?.structure.comment || 'N/A'}\nTone: ${analysis?.tone.comment || 'N/A'}`,
+          articleRating: `SEO: ${analysis?.seo.rating || "N/A"}, Structure: ${
+            analysis?.structure.rating || "N/A"
+          }, Tone: ${analysis?.tone.rating || "N/A"}`,
+          RatingComment: `SEO: ${analysis?.seo.comment || "N/A"}\nStructure: ${
+            analysis?.structure.comment || "N/A"
+          }\nTone: ${analysis?.tone.comment || "N/A"}`,
         },
       });
 
@@ -197,16 +235,17 @@ export async function POST(req: Request): Promise<Response> {
     return new Response(
       new ReadableStream({
         start(controller) {
-          controller.enqueue(JSON.stringify({ success: true, article: enhancedContent }));
+          controller.enqueue(
+            JSON.stringify({ success: true, article: enhancedContent })
+          );
           controller.close();
-        }
+        },
       }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }
     );
-
   } catch (error) {
     console.error("Failed to process completed article:", error);
 
@@ -227,7 +266,6 @@ export async function POST(req: Request): Promise<Response> {
         },
       });
     });
-  
 
     return new Response(
       JSON.stringify({ success: false, message: "Failed to generate article" }),
@@ -235,5 +273,6 @@ export async function POST(req: Request): Promise<Response> {
         status: 500,
         headers: { "Content-Type": "application/json" },
       }
-    );  }
+    );
+  }
 }

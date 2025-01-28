@@ -32,7 +32,7 @@ model User {
   email               String?   @unique
   emailVerified       DateTime?
   image               String?
-  credits             Int       @default(6)
+  credits             Int       @default(10)
   plan                PLANS     @default(FREE)
   creditsUsed         Int       @default(0)
   currentPeriodEnd    DateTime?
@@ -42,6 +42,10 @@ model User {
   onboardingCompleted Boolean   @default(false)
   preferredTone       String?   @default("professional")
   targetAudience      String?
+  // title           String?
+  siteUrl         String?   
+  metaDescription String?
+  blogLinks       String[] // Array of URLs
   articles            Article[]
   payments            Payment[]
   sessions            Session[]

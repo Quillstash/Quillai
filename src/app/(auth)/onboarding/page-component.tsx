@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Dialog } from '@headlessui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -20,6 +21,7 @@ import { z } from 'zod'
 const formSchema = z.object({
   preferredTone: z.enum(['professional', 'casual', 'academic', 'conversational', 'humorous', 'persuasive']),
   targetAudience: z.string().min(1, 'Target audience is required'),
+  website: z.string().url('Please enter a valid website URL').min(1, 'Website URL is required').nullable(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -34,6 +36,7 @@ export default function OnboardingPageComponent() {
     defaultValues: {
       preferredTone: 'professional',
       targetAudience: '',
+      website: '',
     },
   })
 
@@ -71,6 +74,18 @@ export default function OnboardingPageComponent() {
         <div className="container mx-auto px-4 py-8 max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Welcome! Let&apos;s set up your preferences</h1>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-1">Website URL</label>
+              <Input
+                {...register('website')}
+                type="url"
+                placeholder="https://your-website.com"
+                className="w-full"
+              />
+              {errors.website && <p className="text-red-500 text-sm mt-1">{errors.website.message}</p>}
+              <p className="text-sm text-gray-500 mt-1">We&apos;ll crawl your website with our special bots to generate specialized articles tailored to your content!</p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">Preferred Tone</label>
               <Select 
