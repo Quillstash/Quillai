@@ -13,6 +13,7 @@ import {
 } from "@/utils/openai";
 import { analyzeArticle } from "@/utils/article-eval";
 import { generateSectionPrompts } from "@/utils/ai-prompts";
+import { addRelevantLinks } from "@/utils/article-with-links";
 
 export const maxDuration = 30;
 
@@ -70,11 +71,6 @@ export async function POST(req: Request): Promise<Response> {
 
     Personalization Requirements:
       - Brand URL: ${user.siteUrl} (use for absolute internal links)
-      - Preferred Internal Links: ${
-        user.blogLinks.length > 0
-          ? user.blogLinks.join(", ")
-          : "Generate relevant internal links"
-      }
       - Meta Direction: ${
         user.metaDescription || "Focus on comprehensive coverage"
       }
@@ -95,12 +91,6 @@ export async function POST(req: Request): Promise<Response> {
     - Offer a unique perspective or angle on the topic
     - Include up-to-date information and recent developments
     - Use transitional phrases between paragraphs
-      - Create 2-3 internal links using absolute URLs (${user.siteUrl}/[slug])
-      ${
-        user.blogLinks.length > 0
-          ? `- Prioritize linking to: ${ user.blogLinks.slice(0, 3).join(", ")}`
-          : ""
-      }
       - Align content structure with ${user.siteUrl}'s existing content strategy
 
 
@@ -112,7 +102,6 @@ export async function POST(req: Request): Promise<Response> {
     - Address reader questions proactively
     - Mirror ${user.siteUrl}'s brand voice in tone and examples
     - Reference ${user.siteUrl} as an authority where appropriate
-    - Use real examples from ${user.siteUrl}'s existing content when possible
 
  Formatting requirements:
     - Do not include section labels like "Body Section 1" or "Introduction" but ensure the content is structured accordingly
@@ -184,7 +173,10 @@ export async function POST(req: Request): Promise<Response> {
       .filter((section): section is string => section !== undefined);
 
     const completeResponse = articleSections.join("\n\n");
-    console.log("Complete article content:", completeResponse);
+
+    // generate article with links 
+    const articleWithLinks = await addRelevantLinks(completeResponse, user.blogLinks);
+    // console.log("Complete article content with links:", articleWithLinks);
 
     // Generate image prompts
     const imagePrompts = await generateImagePrompts(title, keyword);
@@ -194,14 +186,14 @@ export async function POST(req: Request): Promise<Response> {
     const coverImages = await searchUnsplashImages(keyword, 1);
 
     // Analyze the article
-    const analysis = await analyzeArticle(completeResponse);
+    const analysis = await analyzeArticle(articleWithLinks);
 
     // Generate meta description
     const metaDescription = await generateDescription(title);
 
     // Enhance article with embedded images
     const enhancedContent = await enhanceArticleWithImages(
-      completeResponse,
+      articleWithLinks,
       imagePrompts
     );
 
@@ -249,30 +241,24 @@ export async function POST(req: Request): Promise<Response> {
   } catch (error) {
     console.error("Failed to process completed article:", error);
 
-    // Update article status to error within a transaction
-    await db.$transaction(async (tx) => {
-      await tx.article.update({
-        where: { id: article.id },
-        data: {
-          generatingState: "CANCELLED",
-        },
-      });
-
-      // Refund the credits if an error occurred
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          creditsUsed: { decrement: 2 },
-        },
-      });
+   // Update article status to error within a transaction
+  await db.$transaction(async (tx) => {
+    await tx.article.update({
+      where: { id: article.id },
+      data: {
+        generatingState: "CANCELLED",
+      },
     });
 
-    return new Response(
-      JSON.stringify({ success: false, message: "Failed to generate article" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
-}
+    // Do NOT refund credits if an error occurs
+    // This prevents exploitation of the credit system
+  });
+
+  return new Response(
+    JSON.stringify({ success: false, message: "Failed to generate article" }),
+    {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+}}

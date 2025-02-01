@@ -40,7 +40,7 @@ export async function generateImagePrompts(title: string, keyword: string): Prom
       },
       {
         role: 'user',
-        content: `Generate 3 simple, single-word image search prompts for Unsplash based on the article title: ${title} and keyword: ${keyword}`,
+        content: `Generate 3 simple, single-word image search prompts for Unsplash based on the article keyword: ${keyword}`,
       },
     ],
   });

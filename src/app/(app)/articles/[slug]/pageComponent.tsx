@@ -260,7 +260,7 @@ export default function ArticleComponent({
         />
 
         {/* Meta Description Section */}
-        <Card className="p-6">
+        {/* <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Meta Description</h3>
           {isEditing ? (
             <Textarea
@@ -271,7 +271,7 @@ export default function ArticleComponent({
           ) : (
             <p className="text-muted-foreground">{formValues.metaDescription}</p>
           )}
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
