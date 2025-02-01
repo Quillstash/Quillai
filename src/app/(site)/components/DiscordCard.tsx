@@ -27,13 +27,11 @@ const DiscordCard = () => {
         </p>
       </CardBody>
       <CardFooter>
-        <Button
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg"
-          href={process.env.PERMANENT_DISCORD_LINK}
-          as={Link}
-        >
-          <span>Join us today</span>
-          <ArrowUpRight size={16} />
+        <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg">
+          <Link href="https://discord.gg/PN85bBuuqg" target="_blank">
+            <span>Join us today</span>
+            <ArrowUpRight size={16} />
+          </Link>
         </Button>
       </CardFooter>
     </Card>
