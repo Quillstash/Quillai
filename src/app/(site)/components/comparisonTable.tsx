@@ -56,9 +56,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-50 py-16 px-4">
+    <div className="min-h-auto my-16 flex justify-center items-center bg-gray-50 py-16 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold text-center text-navy-900 mb-16">
+        <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 text-center">
           How We Are Different!
         </h1>
 

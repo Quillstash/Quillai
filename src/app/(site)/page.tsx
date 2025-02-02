@@ -5,6 +5,7 @@ import ComparisonTable from "./components/comparisonTable";
 import { FAQ } from "./components/FAQ";
 import { Features } from "./components/Features";
 import { Hero } from "./components/Hero";
+import HowItWorks from "./components/howitworks-section";
 import { PainPoints } from "./components/Painpoints";
 import { Pricing } from "./components/pricing";
 import { Testimonials } from "./components/Testimonials";
@@ -32,6 +33,7 @@ function Page() {
       {/* <WorkflowComparison /> */}
       <PainPoints />
       <Features />
+      <HowItWorks/>
       <Testimonials />
       <ComparisonTable />
       <Pricing />

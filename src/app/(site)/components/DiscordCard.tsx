@@ -27,12 +27,16 @@ const DiscordCard = () => {
         </p>
       </CardBody>
       <CardFooter>
-        <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg">
-          <Link href="https://discord.gg/PN85bBuuqg" target="_blank">
-            <span>Join us today</span>
+        <Link
+          href="https://discord.gg/PN85bBuuqg"
+          target="_blank "
+          className="flex justify-center items-center w-full"
+        >
+          <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg">
+            <span className="text-center">Join us today</span>
             <ArrowUpRight size={16} />
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );

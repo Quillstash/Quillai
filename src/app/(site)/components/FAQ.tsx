@@ -36,7 +36,7 @@ export const FAQ = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4 gradient-text">
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
             Frequently Asked Questions
           </h2>
           <p className="text-xl text-gray-600">

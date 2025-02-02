@@ -15,7 +15,7 @@ export function Pricing() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-navy-900 mb-4">
+          <h2 className="text-4xl md:text-4xl font-bold tracking-tight text-navy-900 mb-4">
             One package,{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-violet-500">
               everything included.
