@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:worker": "opennextjs-cloudflare",
+    "dev:worker": "wrangler dev --port 8771",
+    "preview:worker": "npm run build:worker && npm run dev:worker",
+    "deploy:worker": "npm run build:worker && wrangler deploy"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.11",
@@ -17,6 +21,7 @@
     "@hookform/resolvers": "^3.9.1",
     "@mendable/firecrawl-js": "^1.15.7",
     "@nextui-org/react": "^2.6.8",
+    "@opennextjs/aws": "^3.4.1",
     "@prisma/client": "^6.1.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -74,6 +79,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@opennextjs/cloudflare": "^0.4.4",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^20",
     "@types/react": "^19",
