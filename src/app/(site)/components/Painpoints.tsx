@@ -1,5 +1,4 @@
 import { Clock, TrendingDown, XCircle } from 'lucide-react';
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import Container from '@/components/container';
 
