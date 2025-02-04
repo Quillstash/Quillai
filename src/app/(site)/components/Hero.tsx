@@ -82,10 +82,9 @@ export const Hero = () => {
         <div className="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mb-16">
           <div className="aspect-w-16 aspect-h-9">
             <video
-              src="/video/onboarding.mp4"
+              src="https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupuZjIiWRxBK4SZ8XUeaCcojWDr1F6NHTEfVY9"
               autoPlay
               muted
-              loop
               className="w-full h-full object-cover"
             />
           </div>

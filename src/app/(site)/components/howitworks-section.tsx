@@ -6,17 +6,17 @@ const steps = [
   {
     title: "Sign Up",
     description: "Create your account in just a few clicks. It’s quick, easy, and free to get started.",
-    image: "/images/img4.webp", // Replace with your image path
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0Tupdyx8RHrVZ6GPvJp3ehFR4TdrIflCDKn0oXSU", // Replace with your image path
   },
   {
     title: "Optimize Your Profile",
     description: "We’ll guide you through setting up your profile to attract the right audience and maximize visibility.",
-    image: "/images/img5.webp", // Replace with your image path
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0Tupypfh3aJnKJcxnCWlO34b2Ps7T5yfNv6VaMwX", // Replace with your image path
   },
   {
     title: "Start Ranking & Get Customers",
     description: "Watch your traffic grow as you rank higher and attract new customers effortlessly.",
-    image: "/images/img6.webp", // Replace with your image path
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupcVgAg62NJ8Tc1dEuWq4wGlMojr3XImgQPACF", // Replace with your image path
   },
 ];
 

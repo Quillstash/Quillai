@@ -9,21 +9,21 @@ const painPoints = [
     title: "Time Wasted on Ineffective Content",
     description:
       "Hours spent writing content that never reaches your target audience. Every piece that doesn't rank is money down the drain.",
-    image: "/images/img1.webp"
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupihFDfCASfdlZQHXsMJFqpct8BKb4GvaAIk5V"
   },
   {
     icon: TrendingDown,
     title: "Falling Behind Competitors",
     description:
       "While you struggle with content strategy, your competitors are capturing your potential customers with high-ranking content.",
-    image: "/images/img2.webp"
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupRhm3Se6bl7pJeGfIhU3rXVx42tioOPs8zkyW"
   },
   {
     icon: XCircle,
     title: "Lost Revenue Opportunities",
     description:
       "Poor content ranking means missed opportunities to convert visitors into customers, directly impacting your bottom line.",
-    image: "/images/img3.webp"
+    image: "https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupVYenapUpstL9a6lUmBgjGZcIHDzCFR3dkx8N"
   },
 ];
 
@@ -55,10 +55,9 @@ export const PainPoints = () => {
                       <p className="text-muted-foreground">{point.description}</p>
                     </div>
                     <div className="md:w-1/2 relative h-64 md:h-auto">
-                      <Image
+                      <img
                         src={point.image || "/placeholder.svg"}
                         alt={point.title}
-                        fill
                         className="object-cover"
                       />
                     </div>

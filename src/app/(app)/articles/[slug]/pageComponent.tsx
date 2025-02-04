@@ -1,6 +1,6 @@
 "use client";
 
-import { Article } from "@prisma/client";
+import type { Article } from "@prisma/client";
 import { ArrowLeft, Save, Trash2, AlertTriangle } from 'lucide-react';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
