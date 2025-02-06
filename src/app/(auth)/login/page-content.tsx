@@ -27,7 +27,7 @@ export default function PageContent() {
       router.push('/onboarding');
     } else {
       console.error('Sign-in failed');
-      toast.error('Sign-in failed. Please try again.');
+      toast.error('Loading Please wait.');
     }
   };
 
