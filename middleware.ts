@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { Redis } from '@upstash/redis';
 import { auth as authMiddleware } from '@/auth'; // Import your existing auth middleware
 
@@ -15,8 +15,8 @@ const RATE_LIMIT = {
 };
 
 // Rate limiting middleware
-async function rateLimitMiddleware(req) {
-  const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown-ip';
+async function rateLimitMiddleware(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown-ip';
 
   try {
     // Create a unique key for the IP address
@@ -56,7 +56,7 @@ async function rateLimitMiddleware(req) {
 }
 
 // Combined middleware
-export async function middleware(req) {
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Skip rate limiting for NextAuth.js routes
@@ -71,13 +71,7 @@ export async function middleware(req) {
   }
 
   // Apply auth middleware
-  const authResponse = await authMiddleware(req);
-  if (authResponse) {
-    return authResponse; // Return auth response if authentication fails
-  }
-
-  // If both middlewares pass, allow the request to proceed
-  return NextResponse.next();
+  return authMiddleware();
 }
 
 // Apply the middleware to specific routes
