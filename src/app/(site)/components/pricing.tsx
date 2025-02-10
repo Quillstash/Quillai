@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import Link from "next/link";
 
 export function Pricing() {
   return (
@@ -76,9 +77,11 @@ export function Pricing() {
               </CardContent>
 
               <CardFooter className="relative px-6 pb-8">
+                <Link href='/pricing'>
                 <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg">
                   Get Started Now
                 </Button>
+                </Link>
               </CardFooter>
             </Card>
           </motion.div>
