@@ -93,7 +93,7 @@ export const Hero = () => {
           helps you create SEO-optimized content that ranks higher, faster.
         </p>
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-          <Link href="/login" className="flex items-center gap-2">
+          <Link href="/login" className="flex items-center gap-2 justify-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
