@@ -92,42 +92,40 @@ export const Hero = () => {
           Stop wasting time on content that gets buried. Our AI-powered platform
           helps you create SEO-optimized content that ranks higher, faster.
         </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+        <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+          <Link href="/login" className="flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium"
             >
-              <Link href="/login" className="flex items-center gap-2">
-                <Zap size={16} />
-                Start With 5 Free Articles
-              </Link>
+              <Zap size={16} />
+              Start With 5 Free Articles
             </motion.button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  <div className="flex justify-center items-center gap-2">
-                    
-                 <Wrench size={16} />
+          </Link>
+          <Dialog>
+            <DialogTrigger asChild>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+              >
+                <div className="flex justify-center items-center gap-2">
+                  <Wrench size={16} />
                   How It Works
-                  </div>
-                </motion.button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-4xl max-h-[75vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-center mb-4">
-                    Welcome to QuillAi
-                  </DialogTitle>
-                </DialogHeader>
-                <Features />
-              </DialogContent>
-            </Dialog>
-          </div>
-        
+                </div>
+              </motion.button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-4xl max-h-[75vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-center mb-4">
+                  Welcome to QuillAi
+                </DialogTitle>
+              </DialogHeader>
+              <Features />
+            </DialogContent>
+          </Dialog>
+        </div>
       </motion.div>
     </section>
   );
