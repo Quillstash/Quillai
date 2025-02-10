@@ -93,11 +93,11 @@ export const Hero = () => {
           helps you create SEO-optimized content that ranks higher, faster.
         </p>
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-          <Link href="/login" className="flex items-center gap-2 justify-center">
+          <Link href="/login" >
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium"
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium flex items-center gap-2 justify-center"
             >
               <Zap size={16} />
               Start With 5 Free Articles
