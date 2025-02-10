@@ -11,8 +11,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Features } from "./howitworks";
-import { Feather, FileText, Pen, Lightbulb, Bot, Chrome } from "lucide-react";
+import {
+  Feather,
+  FileText,
+  Pen,
+  Lightbulb,
+  Bot,
+  Chrome,
+  Zap,
+  Wrench,
+} from "lucide-react";
 import { FloatingElement } from "./Floatingelements";
+import { VideoSection } from "./VideoSection";
 
 export const Hero = () => {
   const sectionRef = useRef(null);
@@ -20,18 +30,18 @@ export const Hero = () => {
   return (
     <section
       ref={sectionRef}
-      className="py-16 flex flex-col items-center justify-center hero-gradient px-4 relative overflow-hidden"
+      className="py-16 flex flex-col items-center justify-center hero-gradient px-4 relative overflow-hidden mt-20"
     >
       <FloatingElement icon={Bot} top="7%" left="10%" color="text-[#3B82F6]" />
 
       <FloatingElement
         icon={FileText}
-        top="20%"
+        top="30%"
         right="10%"
         color="text-[#8B5CF6]"
       />
 
-      <FloatingElement icon={Pen} top="40%" left="11%" color="text-[#22C55E]" />
+      <FloatingElement icon={Pen} top="65%" left="11%" color="text-[#22C55E]" />
 
       <FloatingElement
         icon={Lightbulb}
@@ -42,14 +52,14 @@ export const Hero = () => {
 
       <FloatingElement
         icon={Feather}
-        top="25%"
+        top="40%"
         left="9%"
         color="text-[#EC4899]"
       />
 
       <FloatingElement
         icon={Chrome}
-        top="40%"
+        top="60%"
         right="11%"
         color="text-[#3B82F6]"
       />
@@ -66,57 +76,60 @@ export const Hero = () => {
             Actually Ranks
           </span>
         </h1>
-        <div className="text-xl md:text-2xl text-gray-600 mb-6 h-12">
-          <Typewriter
-            options={{
-              strings: ["Write Smarter...", "Rank Faster...", "Save Time..."],
-              autoStart: true,
-              loop: true,
-            }}
-          />
+        <div className="text-md md:text-md text-gray-600 mb-6 flex justify-center items-center gap-4">
+          <div>
+            <span className="font-bold">✓</span> Writes like a{" "}
+            <strong>human</strong>
+          </div>
+          <div>
+            <span className="font-bold">✓</span> Optimized to{" "}
+            <strong>rank first</strong>
+          </div>
+          <div>
+            <span className="font-bold">✓</span> <strong>One-click</strong>{" "}
+            generation
+          </div>
         </div>
         <p className="text-lg text-gray-800 md:text-xl mb-12">
           Stop wasting time on content that gets buried. Our AI-powered platform
           helps you create SEO-optimized content that ranks higher, faster.
         </p>
-        <div className="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mb-16">
-          <div className="aspect-w-16 aspect-h-9">
-            <video
-              src="https://r5xo8sk0k5.ufs.sh/f/wtzFtcdI0TupuZjIiWRxBK4SZ8XUeaCcojWDr1F6NHTEfVY9"
-              autoPlay
-              muted
-              className="w-full h-full object-cover"
-            />
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium"
+            >
+              <Link href="/login" className="flex items-center gap-2">
+                <Zap size={16} />
+                Start With 5 Free Articles
+              </Link>
+            </motion.button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <div className="flex justify-center items-center gap-2">
+                    
+                 <Wrench size={16} />
+                  How It Works
+                  </div>
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-4xl max-h-[75vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-center mb-4">
+                    Welcome to QuillAi
+                  </DialogTitle>
+                </DialogHeader>
+                <Features />
+              </DialogContent>
+            </Dialog>
           </div>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium"
-          >
-            <Link href="/login">Start Free Trial</Link>
-          </motion.button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
-              >
-                How It Works
-              </motion.button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-4xl max-h-[75vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-center mb-4">
-                  Welcome to QuillAi
-                </DialogTitle>
-              </DialogHeader>
-              <Features />
-            </DialogContent>
-          </Dialog>
-        </div>
+        
       </motion.div>
     </section>
   );

@@ -88,6 +88,7 @@ export default {
   		},
 		  screens: {
 			xl: '1200px', // Custom breakpoint for 1200px
+			xxl: '1350px'
 		  },
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',

@@ -8,7 +8,7 @@ function Container({ children, className, ...props }: ContainerProps) {
   return (
     <div
       className={cn(
-        'h-full mx-auto w-full max-w-screen-xl px-2.5 md:px-20',
+        'h-full mx-auto w-full max-w-screen-xxl px-2.5 md:px-20',
         className
       )}
       {...props}

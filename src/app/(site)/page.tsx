@@ -9,6 +9,7 @@ import HowItWorks from "./components/howitworks-section";
 import { PainPoints } from "./components/Painpoints";
 import { Pricing } from "./components/pricing";
 import { Testimonials } from "./components/Testimonials";
+import { VideoSection } from "./components/VideoSection";
 // import WorkflowComparison from "./components/workFlow";
 
 function Page() {
@@ -30,6 +31,7 @@ function Page() {
     <div>
       {/* <Navbar /> */}
       <Hero />
+      <VideoSection />
       {/* <WorkflowComparison /> */}
       <PainPoints />
       <Features />

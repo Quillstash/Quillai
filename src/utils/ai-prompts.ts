@@ -83,7 +83,8 @@ export const generateSectionPrompts = (
          - Common pitfalls to avoid.
       4. Use numbered lists for sequential procedures.
       5. Mention relevant tools, technologies, or resources.
-      
+
+      - Format text with the appropriate HTML tags
       - Include bold, italic, underline, internal links, mark, and other text formatting with the appropriate HTML tags.
       - Ensure the content includes a call-to-action specific to ${siteUrl}.
       - Align content with the meta description's focus on "${metaDescription?.split(":")[0] || "key theme"}".
@@ -117,7 +118,8 @@ export const generateSectionPrompts = (
          - A thought-provoking question for readers.
          - A clear call-to-action relevant to ${siteUrl}.
          - A memorable quote or statistic related to "${keyword}".
-         
+
+      - Format text with the appropriate HTML tags
       - Use bold, italic, underline, mark, and other text formatting for emphasis.
 
       Previous sections covered:
