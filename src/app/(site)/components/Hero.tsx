@@ -1,6 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import Typewriter from "typewriter-effect";
 import { useRef } from "react";
 import Link from "next/link";
 import {
@@ -22,7 +21,6 @@ import {
   Wrench,
 } from "lucide-react";
 import { FloatingElement } from "./Floatingelements";
-import { VideoSection } from "./VideoSection";
 
 export const Hero = () => {
   const sectionRef = useRef(null);
